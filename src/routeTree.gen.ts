@@ -16,6 +16,7 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCheckinRouteImport } from './routes/app/checkin'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppHistoryRouteImport } from './routes/app/history'
+import { Route as AppReportsRouteImport } from './routes/app/reports'
 import { Route as AppRiskRouteImport } from './routes/app/risk'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const AppHistoryRoute = AppHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRiskRoute = AppRiskRouteImport.update({
   id: '/risk',
   path: '/risk',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/risk': typeof AppRiskRoute
   '/app/': typeof AppIndexRoute
 }
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/risk': typeof AppRiskRoute
   '/app': typeof AppIndexRoute
 }
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/risk': typeof AppRiskRoute
   '/app/': typeof AppIndexRoute
 }
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
+    | '/app/reports'
     | '/app/risk'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
+    | '/app/reports'
     | '/app/risk'
     | '/app'
   id:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
+    | '/app/reports'
     | '/app/risk'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -178,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHistoryRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/reports': {
+      id: '/app/reports'
+      path: '/reports'
+      fullPath: '/app/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/risk': {
       id: '/app/risk'
       path: '/risk'
@@ -192,6 +211,7 @@ interface AppRouteChildren {
   AppCheckinRoute: typeof AppCheckinRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppHistoryRoute: typeof AppHistoryRoute
+  AppReportsRoute: typeof AppReportsRoute
   AppRiskRoute: typeof AppRiskRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -200,6 +220,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCheckinRoute: AppCheckinRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppHistoryRoute: AppHistoryRoute,
+  AppReportsRoute: AppReportsRoute,
   AppRiskRoute: AppRiskRoute,
   AppIndexRoute: AppIndexRoute,
 }
