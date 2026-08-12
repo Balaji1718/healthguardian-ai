@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppAssistantRouteImport } from './routes/app/assistant'
 import { Route as AppCheckinRouteImport } from './routes/app/checkin'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppHistoryRouteImport } from './routes/app/history'
@@ -37,6 +38,11 @@ const AuthRoute = AuthRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssistantRoute = AppAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCheckinRoute = AppCheckinRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/assistant': typeof AppAssistantRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/assistant': typeof AppAssistantRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/assistant': typeof AppAssistantRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/history': typeof AppHistoryRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
+    | '/app/assistant'
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/app/assistant'
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
+    | '/app/assistant'
     | '/app/checkin'
     | '/app/dashboard'
     | '/app/history'
@@ -169,6 +181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/assistant': {
+      id: '/app/assistant'
+      path: '/assistant'
+      fullPath: '/app/assistant'
+      preLoaderRoute: typeof AppAssistantRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/checkin': {
       id: '/app/checkin'
       path: '/checkin'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAssistantRoute: typeof AppAssistantRoute
   AppCheckinRoute: typeof AppCheckinRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppHistoryRoute: typeof AppHistoryRoute
@@ -217,6 +237,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAssistantRoute: AppAssistantRoute,
   AppCheckinRoute: AppCheckinRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppHistoryRoute: AppHistoryRoute,
