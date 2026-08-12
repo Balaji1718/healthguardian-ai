@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCheckinRouteImport } from './routes/app/checkin'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as AppHistoryRouteImport } from './routes/app/history'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -69,14 +77,22 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/app/checkin': typeof AppCheckinRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/auth' | '/app/checkin' | '/app/dashboard' | '/app/'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/checkin'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/checkin' | '/app/dashboard' | '/app'
+  to:
+    '/' | '/auth' | '/app/checkin' | '/app/dashboard' | '/app/history' | '/app'
   id:
     | '__root__'
     | '/'
@@ -84,6 +100,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/checkin'
     | '/app/dashboard'
+    | '/app/history'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -137,18 +154,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppCheckinRoute: typeof AppCheckinRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppHistoryRoute: typeof AppHistoryRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCheckinRoute: AppCheckinRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppHistoryRoute: AppHistoryRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
