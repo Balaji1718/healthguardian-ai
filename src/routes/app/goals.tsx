@@ -99,7 +99,7 @@ function GoalsPage() {
         <form onSubmit={submit} className="surface mb-6 grid gap-4 p-6 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="title">Goal</Label>
-            <Input id="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Walk 30 minutes每 day" />
+            <Input id="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Walk 30 minutes a day" />
             {errors['title'] && <p className="text-xs text-destructive">{errors['title']}</p>}
           </div>
           <div className="space-y-1.5">
