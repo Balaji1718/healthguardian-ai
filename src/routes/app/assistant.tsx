@@ -95,7 +95,7 @@ function Assistant() {
     if (!tool) return;
     setBusy(true);
     try {
-      const result = await tool.run(uid, pending.args);
+      const result = await tool.run({ uid }, pending.args);
       setMessages((m) => [
         ...m,
         { role: "assistant", content: result.ok ? `Done — ${result.summary}` : `I couldn't do that: ${result.summary}` },
