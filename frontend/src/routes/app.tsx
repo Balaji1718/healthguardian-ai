@@ -1,0 +1,51 @@
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { AppShell } from "@/components/layout/AppShell";
+import { LoadingState } from "@/components/common/States";
+import { useAuthListener } from "@/features/auth/useAuth";
+import { isFirebaseConfigured } from "@/services/firebase/config";
+import { FirebaseSetupNotice } from "@/components/common/FirebaseSetupNotice";
+
+export const Route = createFileRoute("/app")({
+  // Firebase auth state lives in the browser; the protected shell is client-rendered.
+  ssr: false,
+  component: AppLayout,
+  head: () => ({
+    meta: [
+      { title: "HealthGuardian AI — Preventive health workspace" },
+      {
+        name: "description",
+        content:
+          "Track daily health, verify medical reports and review preventive health patterns.",
+      },
+      { property: "og:title", content: "HealthGuardian AI" },
+      { property: "og:description", content: "Your private preventive health workspace." },
+    ],
+  }),
+});
+
+function AppLayout() {
+  const { user, loading } = useAuthListener();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user && isFirebaseConfigured && location.pathname !== "/auth") {
+      void navigate({ to: "/auth", replace: true });
+    }
+  }, [loading, user, location.pathname, navigate]);
+
+  if (!isFirebaseConfigured) return <FirebaseSetupNotice />;
+  if (loading || !user)
+    return (
+      <div className="p-10">
+        <LoadingState label="Checking your session…" />
+      </div>
+    );
+
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  );
+}

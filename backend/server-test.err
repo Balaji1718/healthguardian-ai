@@ -1,0 +1,2 @@
+`server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2m8:18:21 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[2026-08-26T14:48:21.951Z]  @firebase/firestore: Firestore (12.18.0): Failed to obtain primary lease for action 'Collect garbage'.

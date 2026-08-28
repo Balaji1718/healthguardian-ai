@@ -1,42 +1,46 @@
 # HealthGuardian AI
 
-You are the primary implementation engineer for my final-year project.
+This repository was restructured into a frontend/backend split without changing the application behavior.
 
-Build the complete application described below in ONE coherent implementation pass.
+## Structure
 
-IMPORTANT:
+- `frontend/` contains the Vite + React app
+- `backend/` contains the Express server entry used as the backend boundary
+- root `package.json` contains convenience scripts for running each side independently
 
-- Do not ask me unnecessary clarification questions.
+## Run locally
 
-- Do not stop after building only a prototype or landing page.
+Frontend:
 
-- Do not replace requirements with your own simplified interpretation.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- Do not silently remove features.
+Backend:
 
-- Do not introduce paid infrastructure.
+```bash
+cd backend
+npm install
+npm start
+```
 
-- Do not introduce Firebase Cloud Functions.
+## Build
 
-- Do not introduce Firebase Storage.
+```bash
+cd frontend
+npm install
+npm run build
+```
 
-- Do not introduce a paid backend.
+This generates the frontend production bundle in `frontend/dist/`.
 
-- Do not hardcode API keys.
+## Notes
 
-- Do not create a generic healthcare dashboard.
-
-- Build the actual HealthGuardian AI product described below.
-
-- Use the existing Firebase project and Firestore structure.
-
-- Prefer simple, maintainable, production-oriented code over excessive abstractions.
-
-- The application must remain functional even when all external LLM providers are unavailable.
-
-- Do not claim the application diagnoses diseases.
-
-- Do not claim 24/7 continuous AI monitoring.
+- This project does not currently contain a meaningful backend API layer beyond the Express server boundary.
+- The app is still a frontend-first application using Firebase and client-side logic as it existed before the separation.
+- No deployment was performed.
 
 ============================================================
 
@@ -2330,7 +2334,7 @@ Recommended areas:
 
 src/
 
-  features/
+features/
 
     auth/
 
@@ -2356,7 +2360,7 @@ src/
 
     settings/
 
-  services/
+services/
 
     firebase/
 
@@ -2366,7 +2370,7 @@ src/
 
     localStorage/
 
-  core/
+core/
 
     validation/
 
@@ -2376,9 +2380,9 @@ src/
 
     utils/
 
-  models/
+models/
 
-  navigation/
+navigation/
 
 Do not duplicate Firebase logic throughout components.
 

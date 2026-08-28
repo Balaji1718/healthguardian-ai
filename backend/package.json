@@ -1,0 +1,21 @@
+{
+  "name": "healthguardian-ai-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch . --watch ../frontend/vite.config.ts --ext js,mjs,cjs,json,ts,tsx,env --exec \"node server.js\"",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "test:ai-providers": "node test-ai-providers.js",
+    "test:ai-router": "node test-ai-router-mocks.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "vite": "^8.2.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0",
+    "nodemon": "^3.1.10"
+  }
+}
