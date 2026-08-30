@@ -27,7 +27,7 @@ This guide provides the exact configuration parameters and instructions needed t
 | **Start Command** | `npm start` |
 
 > **Alternative explicit Build Command**:
-> `npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build`
+> `npm --prefix backend install && npm --prefix frontend install --include=dev && npm --prefix frontend run build`
 
 ---
 

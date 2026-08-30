@@ -150,8 +150,20 @@ The automated audit suite (`backend/test-render-production-readiness.js`) verifi
 
 ---
 
-## 8. Known Limitations & Deployment Notes
+## 9. Phase 12C — Render Build Dependency Fix
 
-1. **Firebase Authorized Domains**: When the Render service is created and assigned a domain (e.g. `https://<service-name>.onrender.com`), this domain must be added to the Firebase Authentication Authorized Domains list in the Firebase Console.
-2. **Client Build Variables**: When deploying on Render, ensure client variables (`VITE_FIREBASE_*`) are set in the Render environment settings prior to triggering the build, so Vite can inject them into the production bundle.
-3. **Local Folder Functionality**: Browser-local file preview and directory handle storage utilize the File System Access API and IndexedDB directly within the user's browser, maintaining zero-server document privacy in accordance with the Phase 10 specification.
+### Root Cause Analysis
+During clean CI installation on Render under `NODE_ENV=production`, npm automatically defaults to omitting `devDependencies` during `npm install`. Additionally, while `@vitejs/plugin-react` was listed in `frontend/package.json`, its resolved entry was missing from `frontend/package-lock.json`. Consequently, `vite build` failed on Render with:
+`Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react'`.
+
+### Resolution Applied
+1. **Lockfile Generation**: Cleanly re-resolved and updated `frontend/package-lock.json` with the exact compatible `@vitejs/plugin-react@5.2.0` package entry.
+2. **Build Installation Flag**: Updated root `package.json` `"install:all"` script to `npm --prefix backend install && npm --prefix frontend install --include=dev`. This guarantees that Vite build tooling (`@vitejs/plugin-react`, `vite`, `typescript`, `@tailwindcss/vite`) is installed during the build phase even when `NODE_ENV=production` is set in the environment.
+3. **Build Tooling Classification**: Maintained proper separation between build-time devDependencies (`@vitejs/plugin-react`, `vite`) and runtime dependencies (`react`, `react-dom`, `firebase`, `express`, `cross-env`).
+4. **Automated Verification Suite**: Added `backend/test-render-build-dependencies.js` to ensure lockfile consistency, package resolution, and build success on clean environments.
+
+### Verification Results
+- **Clean Install**: `npm run install:all` under `NODE_ENV=production` succeeds (100%).
+- **Frontend Build**: `npm run build` succeeds (100%, `frontend/dist/` generated).
+- **Dependency Audit**: `node backend/test-render-build-dependencies.js` (10/10 assertions pass).
+- **Server Smoke Test**: `npm start` serves `/`, `/api/health`, and SPA routes with HTTP 200.

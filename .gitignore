@@ -17,6 +17,7 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+render-env-values.local.txt
 
 # Environment files (keep example tracked, keep real values local only)
 .env
