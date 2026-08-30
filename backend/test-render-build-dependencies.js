@@ -81,11 +81,27 @@ assert(
   Boolean(packageJson.optionalDependencies?.['@rolldown/binding-linux-x64-gnu']),
   'frontend/package.json declares @rolldown/binding-linux-x64-gnu in optionalDependencies',
 );
+assert(
+  Boolean(packageJson.optionalDependencies?.['lightningcss-linux-x64-gnu']),
+  'frontend/package.json declares lightningcss-linux-x64-gnu in optionalDependencies',
+);
+assert(
+  Boolean(packageJson.optionalDependencies?.['@tailwindcss/oxide-linux-x64-gnu']),
+  'frontend/package.json declares @tailwindcss/oxide-linux-x64-gnu in optionalDependencies',
+);
 
 // 8. frontend/package-lock.json contains Linux native bindings for Render
 assert(
   lockfileContent.includes('node_modules/@rolldown/binding-linux-x64-gnu'),
   'frontend/package-lock.json contains resolved node_modules/@rolldown/binding-linux-x64-gnu entry',
+);
+assert(
+  lockfileContent.includes('lightningcss-linux-x64-gnu'),
+  'frontend/package-lock.json contains resolved lightningcss-linux-x64-gnu entry',
+);
+assert(
+  lockfileContent.includes('@tailwindcss/oxide-linux-x64-gnu'),
+  'frontend/package-lock.json contains resolved @tailwindcss/oxide-linux-x64-gnu entry',
 );
 
 // 9. frontend/dist build output verified
