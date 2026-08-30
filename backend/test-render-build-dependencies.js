@@ -76,7 +76,19 @@ assert(
   'root package.json install:all includes --include=dev for frontend build tooling',
 );
 
-// 7. frontend/dist build output verified
+// 7. frontend/package.json declares cross-platform native bindings
+assert(
+  Boolean(packageJson.optionalDependencies?.['@rolldown/binding-linux-x64-gnu']),
+  'frontend/package.json declares @rolldown/binding-linux-x64-gnu in optionalDependencies',
+);
+
+// 8. frontend/package-lock.json contains Linux native bindings for Render
+assert(
+  lockfileContent.includes('node_modules/@rolldown/binding-linux-x64-gnu'),
+  'frontend/package-lock.json contains resolved node_modules/@rolldown/binding-linux-x64-gnu entry',
+);
+
+// 9. frontend/dist build output verified
 const distHtmlPath = path.join(frontendDir, 'dist/index.html');
 assert(fs.existsSync(distHtmlPath), 'frontend/dist/index.html exists and is generated');
 

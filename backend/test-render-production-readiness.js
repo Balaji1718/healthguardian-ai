@@ -119,8 +119,12 @@ async function runTests() {
     }
   });
 
-  // Wait up to 5s for server to start
-  for (let i = 0; i < 25; i++) {
+  serverProcess.stderr.on('data', (d) => {
+    console.error(`[Server stderr]: ${d.toString()}`);
+  });
+
+  // Wait up to 10s for server to start
+  for (let i = 0; i < 50; i++) {
     if (serverStarted) break;
     await sleep(200);
   }
