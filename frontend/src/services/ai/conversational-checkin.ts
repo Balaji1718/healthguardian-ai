@@ -42,7 +42,10 @@ export interface ExtractionResponse {
 /**
  * Client service to extract structured checkin fields from natural language text.
  */
-export async function extractCheckinFromText(userText: string): Promise<ExtractionResponse> {
+export async function extractCheckinFromText(
+  userText: string,
+  language = "en",
+): Promise<ExtractionResponse> {
   const text = (userText || "").trim();
   if (!text) {
     return { ok: false, error: "Please enter your check-in description." };
@@ -52,7 +55,7 @@ export async function extractCheckinFromText(userText: string): Promise<Extracti
     const res = await fetch("/api/ai/extract-checkin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, language }),
     });
 
     if (!res.ok) {

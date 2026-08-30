@@ -2,12 +2,18 @@
   "name": "healthguardian-ai",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
     "dev": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | ForEach-Object { try { Stop-Process -Id $_.OwningProcess -Force -ErrorAction Stop } catch {} }; npm --prefix backend run dev\"",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "test:ai-providers": "npm --prefix backend run test:ai-providers",
     "test:ai-router": "npm --prefix backend run test:ai-router",
+    "test:i18n": "node backend/test-i18n-completeness.js && node backend/test-i18n-runtime-audit.js",
+    "lint": "npm --prefix frontend run lint",
     "build": "npm --prefix frontend run build",
     "build:frontend": "npm --prefix frontend run build",
     "start": "npm --prefix backend start",

@@ -1,14 +1,31 @@
-import { CheckCircle2, Edit3, Heart, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  CheckCircle2,
+  Edit3,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+  AlertTriangle,
+  FileText,
+  Check,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/locales/i18n";
 import type { CheckinSource, DailyCheckin } from "@/models";
 
-interface CaptureReviewProps {
+export interface CaptureReviewProps {
   date: string;
   data: Partial<DailyCheckin>;
   source: CheckinSource;
+  fieldConfidence?: Record<string, "high" | "medium" | "low">;
+  isAmbiguous?: boolean;
+  ambiguityReasons?: string[];
+  sourceDocument?: string;
+  sourcePage?: number;
   onEdit: () => void;
-  onConfirm: () => Promise<void>;
+  onConfirm: (includedData?: Partial<DailyCheckin>) => Promise<void>;
   busy: boolean;
 }
 
@@ -20,155 +37,359 @@ const WELLBEING_LABELS: Record<string, { label: string; icon: string }> = {
   not_great: { label: "Not great", icon: "🙁" },
 };
 
-/**
- * Universal Review / Verification Gate.
- * Ensures the user explicitly verifies all captured/extracted health values before committing to storage.
- */
-export function CaptureReview({ date, data, source, onEdit, onConfirm, busy }: CaptureReviewProps) {
+export function CaptureReview({
+  date,
+  data,
+  source,
+  fieldConfidence = {},
+  isAmbiguous = false,
+  ambiguityReasons = [],
+  sourceDocument,
+  sourcePage,
+  onEdit,
+  onConfirm,
+  busy,
+}: CaptureReviewProps) {
+  const { t } = useTranslation();
+  // Track which fields the user has explicitly selected/included for save
+  const [includedFields, setIncludedFields] = useState<Record<string, boolean>>({
+    date: true,
+    wellbeing: Boolean(data.wellbeing),
+    sleepHours: data.sleepHours != null,
+    waterGlasses: data.waterGlasses != null,
+    exerciseMinutes: data.exerciseMinutes != null,
+    weightKg: data.weightKg != null,
+    bloodPressure: data.systolicBP != null && data.diastolicBP != null,
+    bloodGlucose: data.bloodGlucose != null,
+    symptoms: Boolean(data.symptoms && data.symptoms.length > 0),
+    tags: Boolean(data.tags && data.tags.length > 0),
+    notes: Boolean(data.notes),
+  });
+
+  const toggleField = (fieldKey: string) => {
+    setIncludedFields((prev) => ({
+      ...prev,
+      [fieldKey]: !prev[fieldKey],
+    }));
+  };
+
   const wellbeingObj = data.wellbeing ? WELLBEING_LABELS[data.wellbeing] : undefined;
 
-  const items = [
-    {
-      label: "Date",
-      value: date,
-      highlight: false,
-    },
-    {
-      label: "How you feel",
-      value: wellbeingObj
-        ? `${wellbeingObj.icon} ${wellbeingObj.label}`
-        : data.wellbeing || "Not specified",
-      highlight: Boolean(data.wellbeing),
-    },
-    {
-      label: "Sleep",
-      value: data.sleepHours != null ? `${data.sleepHours} hours` : "Not logged",
-      highlight: data.sleepHours != null,
-    },
-    {
-      label: "Water",
-      value: data.waterGlasses != null ? `${data.waterGlasses} glasses` : "Not logged",
-      highlight: data.waterGlasses != null,
-    },
-    {
-      label: "Exercise",
-      value: data.exerciseMinutes != null ? `${data.exerciseMinutes} minutes` : "Not logged",
-      highlight: data.exerciseMinutes != null,
-    },
-    ...(data.weightKg != null
-      ? [{ label: "Weight", value: `${data.weightKg} kg`, highlight: true }]
-      : []),
-    ...(data.systolicBP != null && data.diastolicBP != null
-      ? [
-          {
-            label: "Blood pressure",
-            value: `${data.systolicBP}/${data.diastolicBP} mmHg`,
-            highlight: true,
-          },
-        ]
-      : []),
-    ...(data.bloodGlucose != null
-      ? [
-          {
-            label: "Blood glucose",
-            value: `${data.bloodGlucose} ${data.bloodGlucoseUnit || "mg/dL"}`,
-            highlight: true,
-          },
-        ]
-      : []),
-  ];
+  // Build field review items
+  const items = useMemo(
+    () => [
+      {
+        id: "date",
+        label: "Date",
+        value: date,
+        hasValue: true,
+        canExclude: false,
+        confidence: fieldConfidence.date || "high",
+      },
+      {
+        id: "wellbeing",
+        label: "How you feel",
+        value: wellbeingObj
+          ? `${wellbeingObj.icon} ${wellbeingObj.label}`
+          : data.wellbeing || "Not specified",
+        hasValue: Boolean(data.wellbeing),
+        canExclude: true,
+        confidence: fieldConfidence.wellbeing || "high",
+      },
+      {
+        id: "sleepHours",
+        label: "Sleep",
+        value: data.sleepHours != null ? `${data.sleepHours} hours` : "Not logged",
+        hasValue: data.sleepHours != null,
+        canExclude: true,
+        confidence: fieldConfidence.sleepHours || "high",
+      },
+      {
+        id: "waterGlasses",
+        label: "Water",
+        value: data.waterGlasses != null ? `${data.waterGlasses} glasses` : "Not logged",
+        hasValue: data.waterGlasses != null,
+        canExclude: true,
+        confidence: fieldConfidence.waterGlasses || "high",
+      },
+      {
+        id: "exerciseMinutes",
+        label: "Exercise",
+        value:
+          data.exerciseMinutes != null
+            ? `${data.exerciseMinutes} mins ${data.exerciseType ? `(${data.exerciseType})` : ""}`
+            : "Not logged",
+        hasValue: data.exerciseMinutes != null,
+        canExclude: true,
+        confidence: fieldConfidence.exerciseMinutes || "high",
+      },
+      {
+        id: "weightKg",
+        label: "Weight",
+        value: data.weightKg != null ? `${data.weightKg} kg` : "Not logged",
+        hasValue: data.weightKg != null,
+        canExclude: true,
+        confidence: fieldConfidence.weightKg || "high",
+      },
+      {
+        id: "bloodPressure",
+        label: "Blood pressure",
+        value:
+          data.systolicBP != null && data.diastolicBP != null
+            ? `${data.systolicBP}/${data.diastolicBP} mmHg`
+            : "Not logged",
+        hasValue: data.systolicBP != null && data.diastolicBP != null,
+        canExclude: true,
+        confidence: fieldConfidence.systolicBP || "high",
+      },
+      {
+        id: "bloodGlucose",
+        label: "Blood glucose",
+        value:
+          data.bloodGlucose != null
+            ? `${data.bloodGlucose} ${data.bloodGlucoseUnit || "mg/dL"}`
+            : "Not logged",
+        hasValue: data.bloodGlucose != null,
+        canExclude: true,
+        confidence: fieldConfidence.bloodGlucose || "high",
+      },
+    ],
+    [date, data, wellbeingObj, fieldConfidence],
+  );
+
+  // Compute final payload with only user-included fields
+  const handleConfirmAction = async () => {
+    const finalPayload: Partial<DailyCheckin> = {
+      date,
+      wellbeing: includedFields.wellbeing ? (data.wellbeing ?? null) : null,
+      sleepHours: includedFields.sleepHours ? (data.sleepHours ?? null) : null,
+      waterGlasses: includedFields.waterGlasses ? (data.waterGlasses ?? null) : null,
+      exerciseMinutes: includedFields.exerciseMinutes ? (data.exerciseMinutes ?? null) : null,
+      exerciseType: includedFields.exerciseMinutes ? (data.exerciseType ?? null) : null,
+      weightKg: includedFields.weightKg ? (data.weightKg ?? null) : null,
+      systolicBP: includedFields.bloodPressure ? (data.systolicBP ?? null) : null,
+      diastolicBP: includedFields.bloodPressure ? (data.diastolicBP ?? null) : null,
+      bloodGlucose: includedFields.bloodGlucose ? (data.bloodGlucose ?? null) : null,
+      bloodGlucoseUnit: data.bloodGlucoseUnit ?? "mg/dL",
+      symptoms: includedFields.symptoms ? (data.symptoms ?? []) : [],
+      tags: includedFields.tags ? (data.tags ?? []) : [],
+      notes: includedFields.notes ? (data.notes ?? null) : null,
+    };
+
+    await onConfirm(finalPayload);
+  };
+
+  const getConfidenceBadge = (level?: "high" | "medium" | "low") => {
+    if (level === "low") {
+      return (
+        <Badge
+          variant="outline"
+          className="text-[9px] px-1 py-0 text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10"
+        >
+          {t("review.lowConfidence")}
+        </Badge>
+      );
+    }
+    if (level === "medium") {
+      return (
+        <Badge
+          variant="outline"
+          className="text-[9px] px-1 py-0 text-blue-500 border-blue-500/30 bg-blue-500/10"
+        >
+          {t("review.medConfidence")}
+        </Badge>
+      );
+    }
+    return (
+      <Badge
+        variant="outline"
+        className="text-[9px] px-1 py-0 text-success border-success/30 bg-success/10"
+      >
+        {t("review.highConfidence")}
+      </Badge>
+    );
+  };
 
   return (
-    <div className="surface p-6 space-y-6 max-w-xl mx-auto rounded-2xl shadow-xs border">
+    <div className="surface p-5 sm:p-6 space-y-5 max-w-xl mx-auto rounded-2xl shadow-xs border">
+      {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-foreground">Review today's check-in</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">
+              {t("review.gateTitle")}
+            </h2>
             <Badge
               variant="outline"
               className="gap-1 text-[10px] text-primary border-primary/30 bg-primary/5"
             >
-              <ShieldCheck className="size-3" /> Verification Gate
+              <ShieldCheck className="size-3" /> {t("review.gateBadge")}
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Check the values before saving. Blank entries will stay missing and won't affect your
-            baseline with fake zeroes.
-          </p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{t("review.gateNotice")}</p>
         </div>
       </div>
 
-      {/* Structured Fields Summary */}
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        {items.map((item, idx) => (
-          <div
-            key={idx}
-            className={`p-3 rounded-xl border text-xs transition-colors ${
-              item.highlight
-                ? "bg-card border-border"
-                : "bg-muted/30 border-border/40 text-muted-foreground"
-            }`}
-          >
-            <span className="text-[11px] text-muted-foreground block font-medium">
-              {item.label}
-            </span>
-            <span
-              className={`font-semibold mt-0.5 block ${item.highlight ? "text-foreground" : "text-muted-foreground/80 italic"}`}
-            >
-              {item.value}
-            </span>
+      {/* Ambiguity Notices (if any) */}
+      {isAmbiguous && ambiguityReasons.length > 0 && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-700 dark:text-amber-300">
+          <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-500" />
+          <div className="space-y-0.5">
+            <span className="font-semibold block">{t("review.verifyNotice")}</span>
+            <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+              {ambiguityReasons.map((r, idx) => (
+                <li key={idx}>{r}</li>
+              ))}
+            </ul>
           </div>
-        ))}
+        </div>
+      )}
+
+      {/* Structured Fields with Per-Field Inclusion Controls */}
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        {items.map((item) => {
+          const isIncluded = includedFields[item.id] ?? true;
+          const isHighlighted = item.hasValue && isIncluded;
+
+          return (
+            <div
+              key={item.id}
+              className={`p-3 rounded-xl border text-xs transition-all relative group ${
+                isHighlighted
+                  ? "bg-card border-border shadow-2xs"
+                  : isIncluded
+                    ? "bg-muted/30 border-border/40 text-muted-foreground"
+                    : "bg-muted/10 border-border/20 opacity-50 line-through"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <span className="text-[11px] text-muted-foreground font-medium">{item.label}</span>
+                <div className="flex items-center gap-1">
+                  {item.hasValue && isIncluded && getConfidenceBadge(item.confidence)}
+                  {item.canExclude && item.hasValue && (
+                    <button
+                      type="button"
+                      onClick={() => toggleField(item.id)}
+                      className="size-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-1"
+                      title={isIncluded ? t("review.excludeField") : t("review.includeField")}
+                      aria-label={`${isIncluded ? "Exclude" : "Include"} ${item.label}`}
+                    >
+                      {isIncluded ? (
+                        <Check className="size-3 text-primary" />
+                      ) : (
+                        <X className="size-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <span
+                className={`font-semibold block ${
+                  isHighlighted ? "text-foreground" : "text-muted-foreground/80 italic no-underline"
+                }`}
+              >
+                {item.value}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Context Chips (if any) */}
       {data.tags && data.tags.length > 0 && (
         <div className="space-y-1.5 pt-1">
-          <span className="text-xs font-semibold text-foreground">Context tags:</span>
-          <div className="flex flex-wrap gap-1.5">
-            {data.tags.map((tag, i) => (
-              <Badge key={i} variant="secondary" className="text-xs font-medium px-2 py-0.5">
-                {tag}
-              </Badge>
-            ))}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">Context tags:</span>
+            <button
+              type="button"
+              onClick={() => toggleField("tags")}
+              className="text-[11px] text-primary hover:underline"
+            >
+              {includedFields.tags ? "Exclude" : "Include"}
+            </button>
           </div>
+          {includedFields.tags && (
+            <div className="flex flex-wrap gap-1.5">
+              {data.tags.map((tag, i) => (
+                <Badge key={i} variant="secondary" className="text-xs font-medium px-2 py-0.5">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Symptoms (if any) */}
       {data.symptoms && data.symptoms.length > 0 && (
         <div className="space-y-1.5 pt-1">
-          <span className="text-xs font-semibold text-foreground">Logged symptoms:</span>
-          <div className="flex flex-wrap gap-1.5">
-            {data.symptoms.map((sym, i) => (
-              <Badge
-                key={i}
-                variant="outline"
-                className="text-xs capitalize text-destructive border-destructive/30 bg-destructive/5 px-2 py-0.5"
-              >
-                {sym.replace(/_/g, " ")}
-              </Badge>
-            ))}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">Logged symptoms:</span>
+            <button
+              type="button"
+              onClick={() => toggleField("symptoms")}
+              className="text-[11px] text-primary hover:underline"
+            >
+              {includedFields.symptoms ? "Exclude" : "Include"}
+            </button>
           </div>
+          {includedFields.symptoms && (
+            <div className="flex flex-wrap gap-1.5">
+              {data.symptoms.map((sym, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-xs capitalize text-destructive border-destructive/30 bg-destructive/5 px-2 py-0.5"
+                >
+                  {sym.replace(/_/g, " ")}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Notes (if any) */}
       {data.notes && (
         <div className="space-y-1 rounded-xl bg-muted/40 p-3 text-xs">
-          <span className="font-semibold text-foreground block">Notes:</span>
-          <p className="text-muted-foreground leading-relaxed italic">{data.notes}</p>
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-foreground block">Notes:</span>
+            <button
+              type="button"
+              onClick={() => toggleField("notes")}
+              className="text-[11px] text-primary hover:underline"
+            >
+              {includedFields.notes ? "Exclude" : "Include"}
+            </button>
+          </div>
+          {includedFields.notes && (
+            <p className="text-muted-foreground leading-relaxed italic">{data.notes}</p>
+          )}
         </div>
       )}
 
-      {/* Provenance & Verification Metadata Banner */}
-      <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">
-          Capture Source:{" "}
-          <strong className="text-primary capitalize">{source.replace(/_/g, " ")}</strong>
-        </span>
+      {/* Provenance & Source Document Attribution Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          {sourceDocument ? (
+            <FileText className="size-3.5 text-primary" />
+          ) : (
+            <Sparkles className="size-3.5 text-primary" />
+          )}
+          <span>
+            {t("review.sourceLabel")}:{" "}
+            <strong className="text-primary capitalize">{source.replace(/_/g, " ")}</strong>
+            {sourceDocument && (
+              <span className="ml-1 text-foreground font-mono text-[11px]">
+                ({sourceDocument}
+                {sourcePage ? ` · Page ${sourcePage}` : ""})
+              </span>
+            )}
+          </span>
+        </div>
         <span className="flex items-center gap-1 font-medium text-success text-[11px]">
-          <CheckCircle2 className="size-3" /> Ready for User Verification
+          <CheckCircle2 className="size-3" /> {t("review.readyToVerify")}
         </span>
       </div>
 
@@ -182,23 +403,23 @@ export function CaptureReview({ date, data, source, onEdit, onConfirm, busy }: C
           disabled={busy}
           className="text-xs h-9 gap-1.5 text-muted-foreground hover:text-foreground"
         >
-          <Edit3 className="size-3.5" /> Edit values
+          <Edit3 className="size-3.5" /> {t("review.editValues")}
         </Button>
 
         <Button
           type="button"
           size="sm"
-          onClick={() => void onConfirm()}
+          onClick={() => void handleConfirmAction()}
           disabled={busy}
           className="text-xs h-9 px-4 gap-1.5 font-medium shadow-xs"
         >
           {busy ? (
             <>
-              <Loader2 className="size-3.5 animate-spin" /> Saving…
+              <Loader2 className="size-3.5 animate-spin" /> {t("common.saving")}
             </>
           ) : (
             <>
-              <CheckCircle2 className="size-3.5" /> Confirm & Save
+              <CheckCircle2 className="size-3.5" /> {t("review.confirmAndSave")}
             </>
           )}
         </Button>

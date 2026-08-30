@@ -32,6 +32,7 @@ import { MarkdownContent } from "@/features/agent/MarkdownContent";
 import { SourceCardList } from "@/features/agent/SourceCardList";
 import { SafeActivityPanel } from "@/features/agent/SafeActivityPanel";
 import { ChatComposer } from "@/features/agent/ChatComposer";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/assistant")({
   component: Assistant,
@@ -97,6 +98,7 @@ const STARTER_PROMPTS = [
 function Assistant() {
   const uid = useUid();
   const online = useAppStore((s) => s.online);
+  const { t, language } = useTranslation();
   const [messages, setMessages] = useState<Bubble[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -110,9 +112,10 @@ function Assistant() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
-  const send = async (text: string, forceWebSearch?: boolean) => {
-    if (!uid || !text.trim() || busy) return;
-    const isSearchActive = forceWebSearch !== undefined ? forceWebSearch : webSearchEnabled;
+  const send = async (textToSend?: string, searchActiveOverride?: boolean) => {
+    const text = (textToSend ?? input).trim();
+    if (!text || !uid || busy) return;
+    const isSearchActive = searchActiveOverride ?? webSearchEnabled;
 
     setInput("");
     setPending(null);
@@ -121,14 +124,12 @@ function Assistant() {
     setBusy(true);
 
     // Dynamic loading phase indicator
-    if (isSearchActive) {
-      setLoadingPhase("Searching the web & checking records…");
-    } else {
-      setLoadingPhase("Checking your records…");
-    }
+    setLoadingPhase(
+      isSearchActive ? "Searching verified medical guidelines…" : "Analyzing your health records…",
+    );
 
     try {
-      const emergency = Boolean(deterministicEmergencyResponse(text));
+      const emergency = Boolean(deterministicEmergencyResponse(text, undefined, language));
       let sid = sessionId;
       if (!emergency) {
         if (!sid) {
@@ -147,6 +148,7 @@ function Assistant() {
         message: text,
         history,
         webSearchEnabled: isSearchActive,
+        language,
       });
 
       setMessages((m) => [

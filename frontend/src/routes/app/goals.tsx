@@ -16,6 +16,7 @@ import { goalSchema } from "@/core/validation/schemas";
 import { GOAL_TYPES } from "@/core/constants/health";
 import { createGoal, updateGoal } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/goals")({
   component: GoalsPage,
@@ -35,9 +36,10 @@ export const Route = createFileRoute("/app/goals")({
   }),
 });
 
-function GoalsPage() {
+export function GoalsPage() {
   const uid = useUid();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useGoals(uid);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,7 +53,7 @@ function GoalsPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  if (isLoading) return <LoadingState label="Loading your goals…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const submit = async (e: React.FormEvent) => {
@@ -88,9 +90,9 @@ function GoalsPage() {
         frequency: "daily",
         targetDate: "",
       });
-      toast.success("Goal created.");
+      toast.success(t("common.success"));
     } catch {
-      toast.error("Could not create the goal.");
+      toast.error(t("common.error"));
     } finally {
       setBusy(false);
     }
@@ -107,13 +109,13 @@ function GoalsPage() {
   return (
     <div>
       <PageHeader
-        title="Goals"
-        description="Small, realistic goals work best. Progress is only ever based on what you actually log."
+        title={t("goals.title")}
+        description={t("goals.subtitle")}
         action={
           <div className="flex items-center gap-2">
             <ContextualHelp content="Progress is calculated strictly from your daily check-in logs. AI suggestions always require your approval." />
             <Button onClick={() => setOpen((v) => !v)}>
-              <Plus className="mr-2 size-4" /> New goal
+              <Plus className="mr-2 size-4" /> {t("goals.newGoalBtn")}
             </Button>
           </div>
         }
@@ -122,7 +124,7 @@ function GoalsPage() {
       {open && (
         <form onSubmit={submit} className="surface mb-6 grid gap-4 p-6 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="title">Goal</Label>
+            <Label htmlFor="title">{t("goals.goalTitle")}</Label>
             <Input
               id="title"
               value={form.title}
@@ -132,22 +134,22 @@ function GoalsPage() {
             {errors["title"] && <p className="text-xs text-destructive">{errors["title"]}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="goalType">Area</Label>
+            <Label htmlFor="goalType">{t("goals.category")}</Label>
             <select
               id="goalType"
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
               value={form.goalType}
               onChange={(e) => setForm({ ...form, goalType: e.target.value })}
             >
-              {GOAL_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t.replace(/_/g, " ")}
+              {GOAL_TYPES.map((gt) => (
+                <option key={gt} value={gt}>
+                  {gt.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="frequency">Frequency</Label>
+            <Label htmlFor="frequency">{t("goals.frequency")}</Label>
             <select
               id="frequency"
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
@@ -162,7 +164,7 @@ function GoalsPage() {
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="targetValue">Target value</Label>
+            <Label htmlFor="targetValue">{t("goals.targetNumber")}</Label>
             <Input
               id="targetValue"
               type="number"
@@ -171,7 +173,7 @@ function GoalsPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="unit">Unit</Label>
+            <Label htmlFor="unit">{t("goals.unitOptional")}</Label>
             <Input
               id="unit"
               value={form.unit}
@@ -179,19 +181,19 @@ function GoalsPage() {
               placeholder="minutes, glasses, kg"
             />
           </div>
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 flex items-center gap-2">
             <Button type="submit" disabled={busy}>
-              {busy && <Loader2 className="mr-2 size-4 animate-spin" />} Create goal
+              {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("goals.createGoal")}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              {t("goals.cancel")}
             </Button>
           </div>
         </form>
       )}
 
       {goals.length === 0 ? (
-        <EmptyState
-          title="No goals yet"
-          description="Create a goal to give your check-ins something to aim at."
-        />
+        <EmptyState title={t("goals.emptyTitle")} description={t("goals.emptyDesc")} />
       ) : (
         <ul className="space-y-3">
           {goals.map((g) => (
@@ -223,10 +225,10 @@ function GoalsPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-3 px-0"
+                  className="mt-3 px-0 text-xs"
                   onClick={() => void complete(g.id!)}
                 >
-                  Mark completed
+                  {t("goals.markComplete")}
                 </Button>
               )}
             </li>

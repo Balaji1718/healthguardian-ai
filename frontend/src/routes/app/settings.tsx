@@ -23,6 +23,7 @@ import {
 import { deleteAllLocalDocuments } from "@/services/localStorage/documents";
 import { deleteAccount, logout } from "@/services/firebase/auth";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { LanguageSelector } from "@/features/i18n/LanguageSelector";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -266,6 +267,10 @@ function SettingsPage() {
             {busy && <Loader2 className="mr-2 size-4 animate-spin" />} Save profile
           </Button>
         </div>
+      </section>
+
+      <section className="surface mt-4 space-y-3 p-6">
+        <LanguageSelector variant="settings" />
       </section>
 
       <section className="surface mt-4 space-y-3 p-6">

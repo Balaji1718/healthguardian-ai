@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { GUIDED_TOUR_STEPS } from "./guide-data";
+import { useTranslation } from "@/locales/i18n";
 
 interface GuidedTourModalProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function GuidedTourModal({
   initialStepIndex = 0,
 }: GuidedTourModalProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStepIndex);
 
   useEffect(() => {
@@ -45,6 +47,13 @@ export function GuidedTourModal({
   const step = GUIDED_TOUR_STEPS[currentStepIndex] || GUIDED_TOUR_STEPS[0];
   const totalSteps = GUIDED_TOUR_STEPS.length;
   const progressPercent = Math.round(((currentStepIndex + 1) / totalSteps) * 100);
+
+  const stepNum = step.stepNumber;
+  const stepTitle = t(`tour.steps.${stepNum}.title`) || step.title;
+  const stepTargetLabel = t(`tour.steps.${stepNum}.targetLabel`) || step.targetLabel;
+  const stepDescription = t(`tour.steps.${stepNum}.description`) || step.description;
+  const stepActionPrompt = t(`tour.steps.${stepNum}.actionPrompt`) || step.actionPrompt;
+  const stepKeyTakeaway = t(`tour.steps.${stepNum}.keyTakeaway`) || step.keyTakeaway;
 
   const handleNext = () => {
     if (currentStepIndex + 1 < totalSteps) {
@@ -83,18 +92,18 @@ export function GuidedTourModal({
               className="gap-1 px-2.5 py-0.5 font-semibold text-xs border-primary/30 text-primary bg-primary/10"
             >
               <Compass className="size-3.5" />
-              <span>Guided App Tour</span>
+              <span>{t("tour.badge")}</span>
             </Badge>
             <span className="text-xs font-mono text-muted-foreground font-medium">
-              Step {step.stepNumber} of {totalSteps}
+              {t("tour.stepCounter", { current: step.stepNumber, total: totalSteps })}
             </span>
           </div>
 
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <span>{step.title}</span>
+            <span>{stepTitle}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Target Page: <strong className="text-foreground">{step.targetLabel}</strong> (
+            {t("tour.targetPage")}: <strong className="text-foreground">{stepTargetLabel}</strong> (
             {step.targetRoute})
           </DialogDescription>
 
@@ -105,20 +114,20 @@ export function GuidedTourModal({
 
         {/* Body Content */}
         <div className="p-6 pt-4 space-y-4 text-xs sm:text-sm">
-          <p className="leading-relaxed text-foreground/90 font-medium">{step.description}</p>
+          <p className="leading-relaxed text-foreground/90 font-medium">{stepDescription}</p>
 
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
               <Sparkles className="size-3.5 shrink-0" />
-              <span>Recommended Action:</span>
+              <span>{t("tour.recommendedAction")}:</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">{step.actionPrompt}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{stepActionPrompt}</p>
           </div>
 
           <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 p-3 rounded-lg border">
             <CheckCircle2 className="size-4 shrink-0 text-emerald-500 mt-0.5" />
             <span>
-              <strong>Key Takeaway:</strong> {step.keyTakeaway}
+              <strong>{t("tour.keyTakeaway")}:</strong> {stepKeyTakeaway}
             </span>
           </div>
         </div>
@@ -133,7 +142,7 @@ export function GuidedTourModal({
               className="text-xs text-muted-foreground hover:text-foreground h-8"
             >
               <X className="size-3.5 mr-1" />
-              <span>Skip Tour</span>
+              <span>{t("tour.skipTour")}</span>
             </Button>
 
             {currentStepIndex > 0 && (
@@ -144,7 +153,7 @@ export function GuidedTourModal({
                 className="text-xs h-8 gap-1"
               >
                 <ArrowLeft className="size-3.5" />
-                <span>Back</span>
+                <span>{t("tour.back")}</span>
               </Button>
             )}
           </div>
@@ -156,7 +165,7 @@ export function GuidedTourModal({
               onClick={handleOpenFeature}
               className="text-xs h-8 gap-1.5 text-primary hover:text-primary/90"
             >
-              <span>Go to {step.targetLabel}</span>
+              <span>{t("tour.goTo", { target: stepTargetLabel })}</span>
               <ExternalLink className="size-3.5" />
             </Button>
 
@@ -166,7 +175,9 @@ export function GuidedTourModal({
               onClick={handleNext}
               className="text-xs h-8 gap-1.5 font-semibold"
             >
-              <span>{currentStepIndex + 1 === totalSteps ? "Finish Tour" : "Next Step"}</span>
+              <span>
+                {currentStepIndex + 1 === totalSteps ? t("tour.finishTour") : t("tour.nextStep")}
+              </span>
               <ArrowRight className="size-3.5" />
             </Button>
           </div>

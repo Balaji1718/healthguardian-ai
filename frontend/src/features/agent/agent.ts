@@ -244,16 +244,25 @@ export function normalizeText(text: string): string {
 export function deterministicEmergencyResponse(
   message: string,
   latestCheckin?: unknown,
+  language: "en" | "ta" | "hi" = "en",
 ): string | null {
   const normalized = normalizeText(message);
-  const msgHasChest = /\b(chest\s*(?:pain|discomfort|pressure)|heart\s*pain)\b/.test(normalized);
+  const msgHasChest =
+    /\b(chest\s*(?:pain|discomfort|pressure)|heart\s*pain)\b/.test(normalized) ||
+    /(?:நெஞ்சு\s*வலி|மாரடைப்பு|மார்பு\s*வலி)/.test(message) ||
+    /(?:सीने\s*में\s*दर्द|हृदय\s*दर्द)/.test(message);
+
   const msgHasBreathing =
     /\b(shortness\s*of\s*breath|severe\s*breathing\s*difficulty|cannot\s*breathe|cant\s*breathe|can't\s*breathe|trouble\s*breathing)\b/.test(
       normalized,
-    );
-  const msgHasFainting = /\b(faint(?:ed|ing)?|passed\s*out|loss\s*of\s*consciousness)\b/.test(
-    normalized,
-  );
+    ) ||
+    /(?:மூச்சுத்திணறல்|சுவாசிக்க\s*முடியவில்லை|மூச்சு\s*வாங்க)/.test(message) ||
+    /(?:सांस\s*लेने\s*में\s*तकलीफ|सांस\s*नहीं\s*ले\s*पा\s*रहा|दम\s*घुट)/.test(message);
+
+  const msgHasFainting =
+    /\b(faint(?:ed|ing)?|passed\s*out|loss\s*of\s*consciousness)\b/.test(normalized) ||
+    /(?:மயக்கம்|மயங்கி|நினைவிழந்த)/.test(message) ||
+    /(?:बेहोश|मूर्छित|चक्कर\s*आकर\s*गिर)/.test(message);
 
   let checkinHasChest = false;
   let checkinHasBreathing = false;
@@ -261,12 +270,24 @@ export function deterministicEmergencyResponse(
 
   if (latestCheckin && Array.isArray(latestCheckin.symptoms)) {
     const symptoms = latestCheckin.symptoms.map((s: string) => s.toLowerCase());
-    checkinHasChest = symptoms.some((s: string) => s.includes("chest"));
+    checkinHasChest = symptoms.some(
+      (s: string) => s.includes("chest") || s.includes("நெஞ்சு") || s.includes("सीने"),
+    );
     checkinHasBreathing = symptoms.some(
-      (s: string) => s.includes("breathing") || s.includes("breath") || s.includes("shortness"),
+      (s: string) =>
+        s.includes("breathing") ||
+        s.includes("breath") ||
+        s.includes("shortness") ||
+        s.includes("மூச்சு") ||
+        s.includes("सांस"),
     );
     checkinHasFainting = symptoms.some(
-      (s: string) => s.includes("faint") || s.includes("passed out") || s.includes("consciousness"),
+      (s: string) =>
+        s.includes("faint") ||
+        s.includes("passed out") ||
+        s.includes("consciousness") ||
+        s.includes("மயக்கம்") ||
+        s.includes("बेहोश"),
     );
   }
 
@@ -276,6 +297,13 @@ export function deterministicEmergencyResponse(
 
   const hasSevereSymptom = hasChest || hasBreathing || hasFainting;
   if (!hasSevereSymptom) return null;
+
+  if (language === "ta") {
+    return "இந்த அறிகுறிகள் தீவிரமாகவோ, திடீரெனவோ அல்லது இப்போது ஏற்பட்டாலோ, உடனடியாக அவசர மருத்துவ சேவைகளை (112 / 108) அணுகவும் அல்லது அருகில் உள்ள அவசர சிகிச்சைப் பிரிவுக்குச் செல்லவும். HealthGuardian அவசர சிகிச்சை கருவி அல்ல.";
+  }
+  if (language === "hi") {
+    return "यदि ये लक्षण गंभीर, अचानक या तीव्र हैं, तो तुरंत स्थानीय आपातकालीन सेवाओं (112) से संपर्क करें या नजदीकी अस्पताल जाएं। HealthGuardian आपातकालीन उपकरण नहीं है।";
+  }
 
   return "If these symptoms are severe, sudden, worsening, or happening now, seek urgent medical attention or contact local emergency services. I cannot diagnose the cause. Do not wait for this app or an AI response in an emergency.";
 }
@@ -288,6 +316,7 @@ export interface RunAgentInput {
   history: Array<{ role: "user" | "assistant"; content: string }>;
   reportId?: string | undefined;
   webSearchEnabled?: boolean | undefined;
+  language?: "en" | "ta" | "hi" | undefined;
 }
 
 /** Original fixed-pipeline agent — preserved intact for fallback. */
@@ -532,6 +561,7 @@ async function runAgentV2({
   history,
   reportId,
   webSearchEnabled = false,
+  language = "en",
 }: RunAgentInput): Promise<AgentOutcome> {
   const startedAt = Date.now();
   const trace: TraceEvent[] = [];
@@ -555,7 +585,7 @@ async function runAgentV2({
     /* ignore */
   }
 
-  const emergencyResponse = deterministicEmergencyResponse(message, latestCheckin);
+  const emergencyResponse = deterministicEmergencyResponse(message, latestCheckin, language);
   if (emergencyResponse) {
     trace.push({
       step: step++,
@@ -693,10 +723,17 @@ async function runAgentV2({
       ? `\nObservations from tools called so far:\n${state.observations.join("\n---\n")}`
       : "\nNo tools have been called yet.";
 
+    const langInstruction =
+      language === "ta"
+        ? "\n\nLANGUAGE INSTRUCTION: The user has selected Tamil (தமிழ்) UI. Respond naturally in Tamil (தமிழ்) by default, while keeping technical medical values and units accurate."
+        : language === "hi"
+          ? "\n\nLANGUAGE INSTRUCTION: The user has selected Hindi (हिन्दी) UI. Respond naturally in Hindi (हिन्दी) by default, while keeping technical medical values and units accurate."
+          : "";
+
     const prompt: AIMessage[] = [
       {
         role: "system",
-        content: `${SYSTEM_PROMPT_V2}\n\nAvailable tools:\n${agentToolCatalogue(webSearchEnabled)}`,
+        content: `${SYSTEM_PROMPT_V2}${langInstruction}\n\nAvailable tools:\n${agentToolCatalogue(webSearchEnabled)}`,
       },
       ...history
         .slice(-6)

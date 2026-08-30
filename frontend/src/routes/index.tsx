@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Activity, Bot, FileText, Heart, Lock, ShieldCheck, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MEDICAL_DISCLAIMER } from "@/core/constants/health";
+import { LanguageSelector } from "@/features/i18n/LanguageSelector";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -25,64 +27,66 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const FEATURES = [
-  {
-    icon: Activity,
-    title: "Deterministic insights",
-    body: "Patterns and your General Health Score are computed by versioned local logic — reproducible, never guessed by a model.",
-  },
-  {
-    icon: FileText,
-    title: "Reports stay on your device",
-    body: "Lab PDFs and photos are read with on-device OCR and stored in your browser. Only values you confirm are saved.",
-  },
-  {
-    icon: Bot,
-    title: "An assistant with limits",
-    body: "The AI explains, summarises and plans. It never diagnoses, never prescribes and always shows which tools it used.",
-  },
-  {
-    icon: WifiOff,
-    title: "Works offline",
-    body: "Check-ins made without a connection queue locally and sync the moment you are back online.",
-  },
-];
+export function Landing() {
+  const { t } = useTranslation();
 
-function Landing() {
+  const features = [
+    {
+      icon: Activity,
+      title: t("landing.feature1Title"),
+      body: t("landing.feature1Body"),
+    },
+    {
+      icon: FileText,
+      title: t("landing.feature2Title"),
+      body: t("landing.feature2Body"),
+    },
+    {
+      icon: Bot,
+      title: t("landing.feature3Title"),
+      body: t("landing.feature3Body"),
+    },
+    {
+      icon: WifiOff,
+      title: t("landing.feature4Title"),
+      body: t("landing.feature4Body"),
+    },
+  ];
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <span className="flex items-center gap-2 font-semibold tracking-tight">
           <Heart className="size-5 text-primary" /> HealthGuardian AI
         </span>
-        <Button asChild variant="secondary" size="sm">
-          <Link to="/auth">Sign in</Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <LanguageSelector variant="header" />
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/auth">{t("landing.signIn")}</Link>
+          </Button>
+        </div>
       </header>
 
       <section className="hg-hero mx-auto max-w-6xl rounded-3xl px-6 py-16 sm:px-12">
-        <p className="text-sm font-medium opacity-90">Preventive health, not diagnosis</p>
+        <p className="text-sm font-medium opacity-90">{t("landing.tagline")}</p>
         <h1 className="mt-3 max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          Understand your health patterns before they become problems.
+          {t("landing.heroTitle")}
         </h1>
-        <p className="mt-5 max-w-xl text-base opacity-95">
-          Log a 60-second daily check-in, read your lab reports on your own device, and get grounded
-          explanations from an assistant that is honest about what it cannot know.
-        </p>
+        <p className="mt-5 max-w-xl text-base opacity-95">{t("landing.heroDescription")}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg" variant="secondary">
             <Link to="/auth" search={{ mode: "register" }}>
-              Create your account
+              {t("landing.createAccount")}
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/auth">I already have an account</Link>
+            <Link to="/auth">{t("landing.alreadyHaveAccount")}</Link>
           </Button>
         </div>
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-4 px-5 py-14 sm:grid-cols-2">
-        {FEATURES.map(({ icon: Icon, title, body }) => (
+        {features.map(({ icon: Icon, title, body }) => (
           <article key={title} className="surface p-6">
             <Icon className="size-5 text-primary" />
             <h2 className="mt-3 text-lg font-semibold">{title}</h2>
@@ -97,10 +101,7 @@ function Landing() {
             <Lock className="size-5 shrink-0 text-primary" />
             <ShieldCheck className="size-5 shrink-0 text-primary" />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Your data belongs to you: every record is scoped to your account, documents never leave
-            your device, and you can export or permanently delete everything from Settings.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("landing.privacyCard")}</p>
         </div>
         <p className="mt-6 text-xs leading-relaxed text-muted-foreground">{MEDICAL_DISCLAIMER}</p>
       </section>

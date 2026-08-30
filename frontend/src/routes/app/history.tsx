@@ -15,6 +15,7 @@ import { useUid } from "@/features/auth/useAuth";
 import { useCheckins } from "@/features/health/queries";
 import { toDate } from "@/services/firebase/repositories";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/history")({
   component: History,
@@ -34,21 +35,15 @@ export const Route = createFileRoute("/app/history")({
   }),
 });
 
-const METRICS = [
-  { key: "sleepHours", label: "Sleep (h)" },
-  { key: "waterGlasses", label: "Water (glasses)" },
-  { key: "exerciseMinutes", label: "Exercise (min)" },
-  { key: "weightKg", label: "Weight (kg)" },
-  { key: "systolicBP", label: "Systolic BP" },
-  { key: "bloodGlucose", label: "Glucose" },
-] as const;
-
-function History() {
+export function History() {
   const uid = useUid();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useCheckins(uid, 120);
-  const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("sleepHours");
+  const [metric, setMetric] = useState<
+    "sleepHours" | "waterGlasses" | "exerciseMinutes" | "weightKg" | "systolicBP" | "bloodGlucose"
+  >("sleepHours");
 
-  if (isLoading) return <LoadingState label="Loading your history…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const checkins = data ?? [];
@@ -60,22 +55,42 @@ function History() {
     }))
     .filter((p) => typeof p.value === "number");
 
+  const metrics = [
+    { key: "sleepHours", label: `${t("dashboard.sleep")} (h)` },
+    { key: "waterGlasses", label: `${t("dashboard.water")} (${t("dashboard.glasses")})` },
+    { key: "exerciseMinutes", label: `${t("dashboard.exercise")} (${t("dashboard.minutes")})` },
+    { key: "weightKg", label: `${t("dashboard.weight")} (kg)` },
+    { key: "systolicBP", label: t("dashboard.bloodPressure") },
+    { key: "bloodGlucose", label: t("dashboard.bloodGlucose") },
+  ] as const;
+
+  const getSourceLabel = (src?: string) => {
+    switch (src) {
+      case "quick_checkin":
+        return `⚡ ${t("history.sourceQuick")}`;
+      case "conversational":
+        return `💬 ${t("history.sourceConversational")}`;
+      case "voice":
+        return `🎙️ ${t("history.sourceVoice")}`;
+      case "file_import":
+        return `📁 ${t("history.sourceFileImport")}`;
+      case "ocr":
+        return `📄 ${t("history.sourceOcr")}`;
+      default:
+        return `📋 ${t("history.sourceManual")}`;
+    }
+  };
+
   return (
     <div>
-      <PageHeader
-        title="Health history"
-        description="Only days you logged appear here — gaps are shown as gaps, never filled in."
-      />
+      <PageHeader title={t("history.title")} description={t("history.subtitle")} />
 
       {checkins.length === 0 ? (
-        <EmptyState
-          title="Nothing logged yet"
-          description="Your history builds up as you complete daily check-ins."
-        />
+        <EmptyState title={t("history.emptyTitle")} description={t("history.emptyDesc")} />
       ) : (
         <>
           <div className="mb-4 flex flex-wrap gap-2">
-            {METRICS.map((m) => (
+            {metrics.map((m) => (
               <button
                 key={m.key}
                 onClick={() => setMetric(m.key)}
@@ -93,9 +108,7 @@ function History() {
 
           <section className="surface p-4">
             {points.length < 2 ? (
-              <p className="p-6 text-sm text-muted-foreground">
-                At least two logged values are needed before a trend can be drawn for this metric.
-              </p>
+              <p className="p-6 text-sm text-muted-foreground">{t("history.trendMinData")}</p>
             ) : (
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -132,12 +145,12 @@ function History() {
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/50 text-left">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Date</th>
-                  <th className="px-4 py-2.5 font-medium">Sleep</th>
-                  <th className="px-4 py-2.5 font-medium">Water</th>
-                  <th className="px-4 py-2.5 font-medium">Exercise</th>
-                  <th className="px-4 py-2.5 font-medium">Symptoms</th>
-                  <th className="px-4 py-2.5 font-medium">Source</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableDate")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableSleep")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableWater")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableExercise")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableSymptoms")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("history.tableSource")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,13 +173,7 @@ function History() {
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                        {c.source === "quick_checkin"
-                          ? "⚡ Quick"
-                          : c.source === "conversational"
-                            ? "💬 Conversational"
-                            : c.source === "voice"
-                              ? "🎙️ Voice"
-                              : "📋 Manual"}
+                        {getSourceLabel(c.source)}
                       </span>
                     </td>
                   </tr>

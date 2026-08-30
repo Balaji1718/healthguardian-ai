@@ -1,12 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
+import {
+  Loader2,
+  RefreshCw,
+  ShieldAlert,
+  ArrowDown,
+  ArrowUp,
+  Minus,
+  HelpCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/AppShell";
 import { Disclaimer, EmptyState, ErrorState, LoadingState } from "@/components/common/States";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useUid } from "@/features/auth/useAuth";
 import { useAnalysis, useAssessments } from "@/features/health/queries";
 import {
@@ -17,9 +26,8 @@ import {
 import { buildHealthContext } from "@/core/adaptive/context";
 import { createGuidance, saveAssessment, toDate } from "@/services/firebase/repositories";
 import { ALGORITHM_VERSION, FACTOR_LABELS, ENABLE_ADAPTIVE_V2 } from "@/core/constants/health";
-import { Progress } from "@/components/ui/progress";
-import { ArrowDown, ArrowUp, Minus, HelpCircle } from "lucide-react";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/risk")({
   component: RiskPage,
@@ -45,9 +53,10 @@ const LEVEL_STYLES: Record<string, string> = {
   low: "bg-success/15 text-success",
 };
 
-function RiskPage() {
+export function RiskPage() {
   const uid = useUid();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { checkins, patterns, isLoading, isError, refetch } = useAnalysis(uid);
   const assessments = useAssessments(uid);
   const [saving, setSaving] = useState(false);
@@ -55,7 +64,7 @@ function RiskPage() {
   const adaptiveEvidence = calculateAdaptiveEvidence(checkins);
   const healthContext = buildHealthContext(adaptiveEvidence);
 
-  if (isLoading) return <LoadingState label="Running the analysis…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const runAndSave = async () => {
@@ -77,19 +86,39 @@ function RiskPage() {
       }
       await qc.invalidateQueries({ queryKey: ["assessments"] });
       await qc.invalidateQueries({ queryKey: ["guidance"] });
-      toast.success("Analysis saved to your record.");
+      toast.success(t("risk.savedSuccess"));
     } catch {
-      toast.error("Could not save the analysis. Please try again.");
+      toast.error(t("risk.saveError"));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const getMetricLabel = (metric: string) => {
+    switch (metric) {
+      case "sleepHours":
+        return t("dashboard.sleep");
+      case "waterGlasses":
+        return t("dashboard.water");
+      case "exerciseMinutes":
+        return t("dashboard.exercise");
+      case "weightKg":
+        return t("dashboard.weight");
+      case "bloodGlucose":
+        return t("dashboard.bloodGlucose");
+      case "systolicBP":
+      case "diastolicBP":
+        return t("dashboard.bloodPressure");
+      default:
+        return metric;
     }
   };
 
   return (
     <div>
       <PageHeader
-        title="Risk & patterns"
-        description="Computed locally from your health history using adaptive personal-baseline analysis. Safety-critical checks remain deterministic."
+        title={t("risk.title")}
+        description={t("risk.subtitle")}
         action={
           <Button onClick={() => void runAndSave()} disabled={saving || patterns.length === 0}>
             {saving ? (
@@ -97,7 +126,7 @@ function RiskPage() {
             ) : (
               <RefreshCw className="mr-2 size-4" />
             )}{" "}
-            Save analysis
+            {t("risk.saveAnalysis")}
           </Button>
         }
       />
@@ -105,20 +134,12 @@ function RiskPage() {
       {ENABLE_ADAPTIVE_V2 && (
         <section className="mb-8">
           <div className="mb-4 flex items-center gap-2">
-            <h2 className="text-base font-semibold text-foreground">
-              Personal Baselines & Deviations
-            </h2>
-            <ContextualHelp content="Personal baselines require sufficient history (minimum 3 logged entries). Deviations reflect your recent 3-day habits relative to your own median." />
+            <h2 className="text-base font-semibold text-foreground">{t("risk.baselinesTitle")}</h2>
+            <ContextualHelp content={t("risk.contextHelp")} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {adaptiveEvidence.map((e) => {
-              const label = e.metric
-                .replace("Hours", "")
-                .replace("Glasses", "")
-                .replace("Minutes", "")
-                .replace("Kg", "")
-                .replace("BP", " BP")
-                .replace("Glucose", " glucose");
+              const label = getMetricLabel(e.metric);
               const unit =
                 e.metric === "sleepHours"
                   ? "h"
@@ -146,28 +167,28 @@ function RiskPage() {
                         <div className="flex items-center gap-1.5 text-xs font-medium">
                           {e.direction === "up" && (
                             <span className="flex items-center text-success">
-                              <ArrowUp className="size-3.5 mr-0.5" /> Up
+                              <ArrowUp className="size-3.5 mr-0.5" /> {t("risk.up")}
                             </span>
                           )}
                           {e.direction === "down" && (
                             <span className="flex items-center text-destructive">
-                              <ArrowDown className="size-3.5 mr-0.5" /> Down
+                              <ArrowDown className="size-3.5 mr-0.5" /> {t("risk.down")}
                             </span>
                           )}
                           {e.direction === "stable" && (
                             <span className="flex items-center text-muted-foreground">
-                              <Minus className="size-3.5 mr-0.5" /> Stable
+                              <Minus className="size-3.5 mr-0.5" /> {t("risk.stable")}
                             </span>
                           )}
                           {e.direction === "unknown" && (
                             <span className="flex items-center text-muted-foreground">
-                              <HelpCircle className="size-3.5 mr-0.5" /> Unknown
+                              <HelpCircle className="size-3.5 mr-0.5" /> {t("risk.unknown")}
                             </span>
                           )}
                         </div>
                       ) : (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                          Needs Data
+                          {t("risk.needsData")}
                         </Badge>
                       )}
                     </div>
@@ -175,21 +196,23 @@ function RiskPage() {
                     {hasBaseline ? (
                       <div className="space-y-2 mt-3">
                         <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Personal Baseline:</span>
+                          <span className="text-muted-foreground">
+                            {t("risk.personalBaseline")}:
+                          </span>
                           <span className="font-medium">
                             {e.baseline?.toFixed(1)}
                             {unit}
                           </span>
                         </div>
                         <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Recent Activity:</span>
+                          <span className="text-muted-foreground">{t("risk.recentActivity")}:</span>
                           <span className="font-medium">
                             {e.recentMedian?.toFixed(1)}
                             {unit}
                           </span>
                         </div>
                         <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Deviation:</span>
+                          <span className="text-muted-foreground">{t("risk.deviation")}:</span>
                           <span
                             className={`font-semibold ${e.deviation && e.deviation < 0 ? "text-destructive" : e.deviation && e.deviation > 0 ? "text-success" : "text-muted-foreground"}`}
                           >
@@ -200,21 +223,26 @@ function RiskPage() {
                         </div>
                         <div className="pt-2">
                           <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
-                            <span>Records: {e.evidenceCount}</span>
-                            <span>Confidence: {Math.round(e.confidence * 100)}%</span>
+                            <span>
+                              {t("risk.records")}: {e.evidenceCount}
+                            </span>
+                            <span>
+                              {t("risk.confidence")}: {Math.round(e.confidence * 100)}%
+                            </span>
                           </div>
                           <Progress value={e.confidence * 100} className="h-1.5" />
                         </div>
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground mt-3">
-                        Log at least{" "}
-                        {e.metric === "sleepHours" ||
-                        e.metric === "waterGlasses" ||
-                        e.metric === "exerciseMinutes"
-                          ? "5"
-                          : "3"}{" "}
-                        entries to calculate your baseline.
+                        {t("risk.logMinEntries", {
+                          count:
+                            e.metric === "sleepHours" ||
+                            e.metric === "waterGlasses" ||
+                            e.metric === "exerciseMinutes"
+                              ? "5"
+                              : "3",
+                        })}
                       </p>
                     )}
                   </div>
@@ -227,11 +255,11 @@ function RiskPage() {
 
       {patterns.length === 0 ? (
         <EmptyState
-          title="No patterns detected"
-          description="Either your recent entries look steady, or there isn't enough logged data yet. Patterns need a few days of check-ins."
+          title={t("risk.noPatternsTitle")}
+          description={t("risk.noPatternsDesc")}
           action={
             <Button asChild variant="outline" className="mt-2">
-              <Link to="/app/checkin">Add a check-in</Link>
+              <Link to="/app/checkin">{t("risk.addCheckin")}</Link>
             </Button>
           }
         />
@@ -248,57 +276,24 @@ function RiskPage() {
               />
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-medium">
-                    {FACTOR_LABELS[p.factor] ?? p.factor.replace(/_/g, " ")}
-                  </h2>
-                  <Badge variant="secondary" className="capitalize">
-                    {p.category.replace(/_/g, " ")}
-                  </Badge>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${LEVEL_STYLES[p.severity === 2 ? "high" : "moderate"]}`}
+                  <h3 className="font-semibold">
+                    {t(`risk.factors.${p.factor}`) || FACTOR_LABELS[p.factor] || p.factor}
+                  </h3>
+                  <Badge
+                    variant="secondary"
+                    className={LEVEL_STYLES[p.severity === 2 ? "high" : "moderate"]}
                   >
-                    {p.severity === 2 ? "Needs attention" : "Worth watching"}
-                  </span>
+                    {p.severity === 2 ? t("risk.safetyCritical") : t("risk.worthWatching")}
+                  </Badge>
                 </div>
-                <p className="mt-1.5 text-sm text-muted-foreground">{p.detail}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{p.message || p.detail}</p>
               </div>
             </article>
           ))}
         </div>
       )}
 
-      <section className="mt-8">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Saved assessments</h2>
-        {(assessments.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nothing saved yet. Use “Save analysis” to keep a dated snapshot.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {(assessments.data ?? []).map((a) => (
-              <li key={a.id} className="surface flex items-center justify-between p-4 text-sm">
-                <span className="capitalize">{a.riskCategory.replace(/_/g, " ")}</span>
-                <span className="flex items-center gap-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs capitalize ${LEVEL_STYLES[a.riskLevel]}`}
-                  >
-                    {a.riskLevel}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {toDate(a.createdAt ?? null)?.toLocaleDateString() ?? ""}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <Disclaimer>
-        These patterns describe what your own entries show. They are not a diagnosis, a probability
-        of disease, or a reason to change any medication. Discuss anything concerning with a
-        qualified clinician.
-      </Disclaimer>
+      <Disclaimer />
     </div>
   );
 }

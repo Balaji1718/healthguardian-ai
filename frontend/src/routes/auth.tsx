@@ -22,6 +22,8 @@ import { isFirebaseConfigured } from "@/services/firebase/config";
 import { FirebaseSetupNotice } from "@/components/common/FirebaseSetupNotice";
 import { useAuthListener } from "@/features/auth/useAuth";
 import { MEDICAL_DISCLAIMER } from "@/core/constants/health";
+import { LanguageSelector } from "@/features/i18n/LanguageSelector";
+import { useTranslation } from "@/locales/i18n";
 
 const searchSchema = z.object({ mode: z.enum(["login", "register", "forgot"]).optional() });
 
@@ -42,12 +44,13 @@ export const Route = createFileRoute("/auth")({
   }),
 });
 
-function friendlyError(e: unknown): string {
+function friendlyError(e: unknown, t: (k: string) => string): string {
   const code = (e as { code?: string })?.code ?? "";
   if (code.includes("invalid-credential") || code.includes("wrong-password"))
     return "That email and password combination did not match.";
   if (code.includes("email-already-in-use")) return "An account already exists with this email.";
-  if (code.includes("weak-password")) return "Choose a stronger password (at least 8 characters).";
+  if (code.includes("weak-password"))
+    return t("auth.passwordTooShort") || "Choose a stronger password (at least 6 characters).";
   if (code.includes("network")) return "You appear to be offline. Sign-in needs a connection.";
   if (code.includes("too-many-requests"))
     return "Too many attempts. Please wait a moment and try again.";
@@ -58,6 +61,7 @@ function AuthPage() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
   const { user, loading } = useAuthListener();
+  const { t } = useTranslation();
   const [authMode, setAuthMode] = useState<"login" | "register" | "forgot">(mode || "login");
   const [form, setForm] = useState({ email: "", password: "", displayName: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,11 +101,16 @@ function AuthPage() {
     setErrors({});
     setBusy(true);
     try {
-      if (isRegister) await register(form.email, form.password, form.displayName);
-      else await login(form.email, form.password);
+      if (isRegister) {
+        await register(form.email, form.password, form.displayName);
+        toast.success(t("auth.signUpSuccess"));
+      } else {
+        await login(form.email, form.password);
+        toast.success(t("auth.signInSuccess"));
+      }
       await navigate({ to: "/app/dashboard", replace: true });
     } catch (err) {
-      toast.error(friendlyError(err));
+      toast.error(friendlyError(err, t));
     } finally {
       setBusy(false);
     }
@@ -111,7 +120,7 @@ function AuthPage() {
     e.preventDefault();
     const email = form.email.trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setErrors({ email: "Enter a valid email address." });
+      setErrors({ email: t("auth.invalidEmail") });
       return;
     }
     setErrors({});
@@ -119,11 +128,9 @@ function AuthPage() {
     try {
       await resetPassword(email);
       setResetSent(true);
-      toast.success("Password recovery instructions sent.");
-    } catch {
-      // Safe generic message to prevent account enumeration
-      setResetSent(true);
-      toast.success("Password recovery instructions sent.");
+      toast.success(t("auth.resetEmailSent"));
+    } catch (err) {
+      toast.error(friendlyError(err, t));
     } finally {
       setBusy(false);
     }
@@ -131,15 +138,14 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link
-          to="/"
-          className="mb-6 flex items-center justify-center gap-2 font-semibold text-foreground"
-        >
-          <Heart className="size-5 text-primary" /> HealthGuardian AI
-        </Link>
+      <div className="w-full max-w-md space-y-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
+            <Heart className="size-5 text-primary" /> {t("common.appName")}
+          </Link>
+          <LanguageSelector variant="auth" />
+        </div>
 
-        {/* 1. If already authenticated: Show clear Account Switcher / Continue state */}
         {!loading && user ? (
           <div className="surface p-6 space-y-4">
             <div className="flex items-center gap-3">
@@ -185,21 +191,21 @@ function AuthPage() {
             </div>
           </div>
         ) : (
-          /* 2. Unauthenticated Explicit Flows (Sign in / Register / Forgot Password) */
           <div className="surface p-6">
             {authMode === "forgot" ? (
-              /* Forgot Password Flow */
               <div className="space-y-4">
                 <button
                   type="button"
                   onClick={() => changeMode("login")}
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                 >
-                  <ArrowLeft className="size-3.5" /> Back to Sign in
+                  <ArrowLeft className="size-3.5" /> {t("auth.backToSignIn")}
                 </button>
 
                 <div>
-                  <h1 className="text-xl font-semibold text-foreground">Reset your password</h1>
+                  <h1 className="text-xl font-semibold text-foreground">
+                    {t("auth.forgotPassword")}
+                  </h1>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Enter your email to receive password recovery instructions.
                   </p>
@@ -211,8 +217,7 @@ function AuthPage() {
                       <CheckCircle2 className="size-4" /> Recovery Email Sent
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      If an account exists for <strong>{form.email}</strong>, we have sent password
-                      recovery instructions. Please check your inbox and spam folder.
+                      {t("auth.resetEmailSent")}
                     </p>
                     <Button
                       variant="outline"
@@ -220,13 +225,13 @@ function AuthPage() {
                       className="w-full text-xs"
                       onClick={() => changeMode("login")}
                     >
-                      Return to Sign in
+                      {t("auth.backToSignIn")}
                     </Button>
                   </div>
                 ) : (
                   <form onSubmit={submitForgot} className="space-y-4" noValidate>
                     <div className="space-y-1.5">
-                      <Label htmlFor="forgot-email">Account email</Label>
+                      <Label htmlFor="forgot-email">{t("auth.email")}</Label>
                       <div className="relative">
                         <Input
                           id="forgot-email"
@@ -246,21 +251,20 @@ function AuthPage() {
 
                     <Button type="submit" className="w-full" disabled={busy}>
                       {busy && <Loader2 className="mr-2 size-4 animate-spin" />}
-                      Send recovery link
+                      {t("auth.sendResetEmail")}
                     </Button>
                   </form>
                 )}
               </div>
             ) : (
-              /* Sign In / Register Flow */
               <>
                 <h1 className="text-xl font-semibold text-foreground">
-                  {authMode === "register" ? "Create your account" : "Welcome back"}
+                  {authMode === "register" ? t("auth.createAccount") : t("auth.welcome")}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {authMode === "register"
                     ? "Your health data is private to your authenticated account."
-                    : "Sign in with your email and password to access your health workspace."}
+                    : t("auth.subtitle")}
                 </p>
 
                 <form className="mt-5 space-y-4" onSubmit={submitAuth} noValidate>
@@ -281,7 +285,7 @@ function AuthPage() {
                   )}
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("auth.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -297,14 +301,14 @@ function AuthPage() {
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{t("auth.password")}</Label>
                       {authMode === "login" && (
                         <button
                           type="button"
                           className="text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                           onClick={() => changeMode("forgot")}
                         >
-                          Forgot password?
+                          {t("auth.forgotPassword")}
                         </button>
                       )}
                     </div>
@@ -319,7 +323,7 @@ function AuthPage() {
                       />
                       <button
                         type="button"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                         className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
                         onClick={() => setShowPassword((value) => !value)}
                       >
@@ -333,7 +337,7 @@ function AuthPage() {
 
                   <Button type="submit" className="w-full" disabled={busy}>
                     {busy && <Loader2 className="mr-2 size-4 animate-spin" />}
-                    {authMode === "register" ? "Create account" : "Sign in"}
+                    {authMode === "register" ? t("auth.createAccount") : t("auth.signIn")}
                   </Button>
                 </form>
 
@@ -344,8 +348,8 @@ function AuthPage() {
                     onClick={() => changeMode(authMode === "register" ? "login" : "register")}
                   >
                     {authMode === "register"
-                      ? "I already have an account — Sign in"
-                      : "Don't have an account? Create one"}
+                      ? t("auth.alreadyHaveAccount")
+                      : t("auth.dontHaveAccount")}
                   </button>
                 </div>
               </>

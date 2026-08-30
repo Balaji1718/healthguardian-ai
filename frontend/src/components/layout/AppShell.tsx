@@ -24,20 +24,32 @@ import { Button } from "@/components/ui/button";
 import { GuidedTourModal } from "@/features/guide/GuidedTourModal";
 import { NewUserGuidePrompt } from "@/features/guide/NewUserGuidePrompt";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { LanguageSelector } from "@/features/i18n/LanguageSelector";
+import { useTranslation } from "@/locales/i18n";
 
-export const NAV = [
-  { to: "/app/dashboard", label: "Dashboard", icon: Gauge },
-  { to: "/app/checkin", label: "Daily Check-in", icon: CalendarCheck },
-  { to: "/app/history", label: "Health History", icon: LineChart },
-  { to: "/app/reports", label: "Medical Reports", icon: FileText },
-  { to: "/app/risk", label: "Risk & Patterns", icon: Activity },
-  { to: "/app/assistant", label: "AI Assistant", icon: Bot },
-  { to: "/app/goals", label: "Goals", icon: Target },
-  { to: "/app/notifications", label: "Notifications", icon: Bell },
-  { to: "/app/specialist", label: "Specialist Guidance", icon: Stethoscope },
-  { to: "/app/guide", label: "Help & Guide", icon: Compass },
-  { to: "/app/support", label: "Support", icon: LifeBuoy },
-  { to: "/app/settings", label: "Profile & Privacy", icon: Settings },
+export const NAV_ITEMS = [
+  { to: "/app/dashboard", key: "nav.dashboard", defaultLabel: "Dashboard", icon: Gauge },
+  {
+    to: "/app/checkin",
+    key: "nav.dailyCheckin",
+    defaultLabel: "Daily Check-in",
+    icon: CalendarCheck,
+  },
+  { to: "/app/history", key: "nav.history", defaultLabel: "Health History", icon: LineChart },
+  { to: "/app/reports", key: "nav.reports", defaultLabel: "Medical Reports", icon: FileText },
+  { to: "/app/risk", key: "nav.risk", defaultLabel: "Risk & Patterns", icon: Activity },
+  { to: "/app/assistant", key: "nav.assistant", defaultLabel: "AI Assistant", icon: Bot },
+  { to: "/app/goals", key: "nav.goals", defaultLabel: "Goals", icon: Target },
+  { to: "/app/notifications", key: "nav.notifications", defaultLabel: "Notifications", icon: Bell },
+  {
+    to: "/app/specialist",
+    key: "nav.specialist",
+    defaultLabel: "Specialist Guidance",
+    icon: Stethoscope,
+  },
+  { to: "/app/guide", key: "nav.guide", defaultLabel: "Help & Guide", icon: Compass },
+  { to: "/app/support", key: "nav.support", defaultLabel: "Support", icon: LifeBuoy },
+  { to: "/app/settings", key: "nav.settings", defaultLabel: "Profile & Privacy", icon: Settings },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -45,11 +57,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [tourOpen, setTourOpen] = useState(false);
   const online = useAppStore((s) => s.online);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { t } = useTranslation();
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.map(({ to, label, icon: Icon }) => {
+      {NAV_ITEMS.map(({ to, key, defaultLabel, icon: Icon }) => {
         const active = path === to;
+        const label = t(key) || defaultLabel;
         return (
           <Link
             key={to}
@@ -84,12 +98,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Button>
         <Link to="/app/dashboard" className="flex items-center gap-2 lg:hidden">
           <Heart className="size-5 text-primary" />
-          <span className="font-semibold">HealthGuardian</span>
+          <span className="font-semibold">{t("common.appName")}</span>
         </Link>
         <div className="ml-auto flex items-center gap-2">
           {!online && (
             <span className="flex items-center gap-1.5 rounded-full bg-warning/20 px-3 py-1 text-xs font-medium text-warning-foreground">
-              <WifiOff className="size-3.5" /> Offline
+              <WifiOff className="size-3.5" /> {t("common.offline")}
             </span>
           )}
           <Button
@@ -99,8 +113,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground hidden sm:flex"
           >
             <Compass className="size-3.5 text-primary" />
-            <span>Guided Tour</span>
+            <span>{t("common.guidedTour")}</span>
           </Button>
+          <LanguageSelector variant="header" />
           <ThemeToggle variant="compact" />
         </div>
       </header>

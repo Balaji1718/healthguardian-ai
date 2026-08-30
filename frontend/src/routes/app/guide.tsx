@@ -23,6 +23,8 @@ import {
 import { GuideSectionCard } from "@/features/guide/GuideSectionCard";
 import type { GuideCategory } from "@/features/guide/types";
 
+import { useTranslation } from "@/locales/i18n";
+
 export const Route = createFileRoute("/app/guide")({
   component: GuidePage,
   head: () => ({
@@ -44,6 +46,7 @@ export const Route = createFileRoute("/app/guide")({
 });
 
 function GuidePage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<GuideCategory | "all">("all");
   const [tourOpen, setTourOpen] = useState(false);
@@ -74,12 +77,12 @@ function GuidePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Help & Guide Center"
-        description="Learn how HealthGuardian AI personalizes health tracking, computes adaptive baselines, and protects your privacy."
+        title={t("guide.title")}
+        description={t("guide.subtitle")}
         action={
           <Button onClick={handleStartTour} className="gap-2 shadow-xs">
             <Compass className="size-4" />
-            <span>Start Guided App Tour</span>
+            <span>{t("guide.startTour")}</span>
           </Button>
         }
       />

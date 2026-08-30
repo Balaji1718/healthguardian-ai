@@ -30,6 +30,7 @@ import {
 } from "@/services/firebase/repositories";
 import type { MedicalReport } from "@/models";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/reports")({
   component: ReportsPage,
@@ -59,9 +60,10 @@ const REPORT_TYPES = [
   "other",
 ];
 
-function ReportsPage() {
+export function ReportsPage() {
   const uid = useUid();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useReports(uid);
   const [file, setFile] = useState<File | null>(null);
   const [meta, setMeta] = useState({
@@ -160,9 +162,9 @@ function ReportsPage() {
       await qc.invalidateQueries({ queryKey: ["reports"] });
       setCandidates([]);
       setFile(null);
-      toast.success("Verified values saved. Only these confirmed values are used in analysis.");
+      toast.success(t("common.success"));
     } catch {
-      toast.error("Could not save the verified values.");
+      toast.error(t("common.error"));
     } finally {
       setBusy(false);
     }
@@ -173,7 +175,7 @@ function ReportsPage() {
     await deleteReport(uid, r.id);
     await deleteLocalDocument(uid, r.localFileId);
     await qc.invalidateQueries({ queryKey: ["reports"] });
-    toast.success("Report and its local file were deleted.");
+    toast.success(t("common.success"));
   };
 
   const openLocal = async (r: MedicalReport) => {
@@ -190,20 +192,17 @@ function ReportsPage() {
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
   };
 
-  if (isLoading) return <LoadingState label="Loading your reports…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   return (
     <div>
-      <PageHeader
-        title="Medical reports"
-        description="Files are read on this device and stored in this browser only. Nothing is uploaded, and no value is saved until you confirm it."
-      />
+      <PageHeader title={t("reports.title")} description={t("reports.subtitle")} />
 
       <form onSubmit={upload} className="surface space-y-4 p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="reportTitle">Report title</Label>
+            <Label htmlFor="reportTitle">{t("reports.reportTitle")}</Label>
             <Input
               id="reportTitle"
               value={meta.reportTitle}
@@ -215,22 +214,22 @@ function ReportsPage() {
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="reportType">Type</Label>
+            <Label htmlFor="reportType">{t("reports.reportType")}</Label>
             <select
               id="reportType"
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
               value={meta.reportType}
               onChange={(e) => setMeta({ ...meta, reportType: e.target.value })}
             >
-              {REPORT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t.replace(/_/g, " ")}
+              {REPORT_TYPES.map((typeKey) => (
+                <option key={typeKey} value={typeKey}>
+                  {typeKey.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="reportDate">Report date</Label>
+            <Label htmlFor="reportDate">{t("reports.reportDate")}</Label>
             <Input
               id="reportDate"
               type="date"
@@ -242,7 +241,7 @@ function ReportsPage() {
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="lab">Laboratory (optional)</Label>
+            <Label htmlFor="lab">{t("reports.labName")}</Label>
             <Input
               id="lab"
               value={meta.laboratoryName}
@@ -253,7 +252,7 @@ function ReportsPage() {
 
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <Label htmlFor="file">Document (PDF, PNG or JPEG, max 15 MB)</Label>
+            <Label htmlFor="file">{t("reports.uploadBoxHint")}</Label>
             <ContextualHelp content="Raw medical documents are processed on your device and stored in local browser IndexedDB. Review OCR results before confirming." />
           </div>
           <Input
@@ -267,7 +266,7 @@ function ReportsPage() {
         {progress !== null && (
           <div>
             <p className="mb-1.5 flex items-center gap-2 text-sm text-muted-foreground">
-              <ScanLine className="size-4" /> Reading on this device… {progress}%
+              <ScanLine className="size-4" /> {t("reports.readingProgress", { progress })}
             </p>
             <Progress value={progress} />
           </div>
@@ -279,17 +278,14 @@ function ReportsPage() {
           ) : (
             <Upload className="mr-2 size-4" />
           )}{" "}
-          Upload & read
+          {t("reports.readAndExtract")}
         </Button>
       </form>
 
       {candidates.length > 0 && (
         <section className="surface mt-6 p-6">
-          <h2 className="font-medium">Check each value before saving</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            OCR can misread numbers. Correct anything wrong and remove anything that isn't a real
-            result — only what you keep is saved.
-          </p>
+          <h2 className="font-medium">{t("reports.verifyModalTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("reports.verifyModalDesc")}</p>
           <div className="mt-4 space-y-3">
             {candidates.map((c, i) => (
               <div
@@ -344,17 +340,18 @@ function ReportsPage() {
             ))}
           </div>
           <Button className="mt-4" onClick={() => void confirmAll()} disabled={busy}>
-            <CheckCircle2 className="mr-2 size-4" /> Confirm and save {candidates.length} value(s)
+            <CheckCircle2 className="mr-2 size-4" /> {t("reports.saveAllConfirmed")} (
+            {candidates.length})
           </Button>
         </section>
       )}
 
       <section className="mt-8">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Your reports</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t("reports.title")}</h2>
         {(data ?? []).length === 0 ? (
           <EmptyState
-            title="No reports yet"
-            description="Upload a lab report to read it privately on this device."
+            title={t("reports.noReportsTitle")}
+            description={t("reports.noReportsDesc")}
           />
         ) : (
           <ul className="space-y-2">
@@ -369,13 +366,15 @@ function ReportsPage() {
                   </p>
                 </div>
                 <Badge variant={r.verificationStatus === "verified" ? "default" : "secondary"}>
-                  {r.verificationStatus === "verified" ? "Verified" : "Awaiting verification"}
+                  {r.verificationStatus === "verified"
+                    ? t("reports.statusVerified")
+                    : t("reports.statusPending")}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={() => void openLocal(r)}>
-                  Open
+                  {t("preview.previewBtn") || "Open"}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => void removeReport(r)}>
-                  Delete
+                  {t("common.delete")}
                 </Button>
               </li>
             ))}
@@ -385,11 +384,7 @@ function ReportsPage() {
 
       <VerifiedValues uid={uid} reportId={(data ?? [])[0]?.id ?? null} />
 
-      <Disclaimer>
-        HealthGuardian can summarise what a report says and how values compare with the printed
-        reference range. It cannot interpret your results medically, and OCR text should always be
-        checked against the original document.
-      </Disclaimer>
+      <Disclaimer />
     </div>
   );
 }

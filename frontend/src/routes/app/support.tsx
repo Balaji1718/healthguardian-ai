@@ -14,6 +14,7 @@ import { useUid } from "@/features/auth/useAuth";
 import { useSupportRequests } from "@/features/health/queries";
 import { supportSchema } from "@/core/validation/schemas";
 import { createSupportRequest, toDate } from "@/services/firebase/repositories";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/support")({
   component: SupportPage,
@@ -33,9 +34,10 @@ export const Route = createFileRoute("/app/support")({
   }),
 });
 
-function SupportPage() {
+export function SupportPage() {
   const uid = useUid();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useSupportRequests(uid);
   const [form, setForm] = useState({
     type: "question",
@@ -46,7 +48,7 @@ function SupportPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
-  if (isLoading) return <LoadingState label="Loading your requests…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const submit = async (e: React.FormEvent) => {
@@ -71,9 +73,9 @@ function SupportPage() {
       });
       await qc.invalidateQueries({ queryKey: ["support"] });
       setForm({ type: "question", reason: "", message: "", priority: "normal" });
-      toast.success("Request recorded. You can track its status below.");
+      toast.success(t("common.success"));
     } catch {
-      toast.error("Could not submit the request.");
+      toast.error(t("common.error"));
     } finally {
       setBusy(false);
     }
@@ -81,14 +83,11 @@ function SupportPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Support"
-        description="Account, data or app questions. For medical concerns, please contact a clinician."
-      />
+      <PageHeader title={t("support.title")} description={t("support.subtitle")} />
 
       <form onSubmit={submit} className="surface grid gap-4 p-6 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="type">Type</Label>
+          <Label htmlFor="type">{t("support.type")}</Label>
           <select
             id="type"
             className="h-9 w-full rounded-md border bg-background px-3 text-sm"
@@ -103,7 +102,7 @@ function SupportPage() {
           </select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="priority">Priority</Label>
+          <Label htmlFor="priority">{t("support.priority")}</Label>
           <select
             id="priority"
             className="h-9 w-full rounded-md border bg-background px-3 text-sm"
@@ -120,7 +119,7 @@ function SupportPage() {
           </select>
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="reason">Summary</Label>
+          <Label htmlFor="reason">{t("support.summary")}</Label>
           <Input
             id="reason"
             value={form.reason}
@@ -129,7 +128,7 @@ function SupportPage() {
           {errors["reason"] && <p className="text-xs text-destructive">{errors["reason"]}</p>}
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="message">Details</Label>
+          <Label htmlFor="message">{t("support.details")}</Label>
           <Textarea
             id="message"
             rows={4}
@@ -144,23 +143,30 @@ function SupportPage() {
             ) : (
               <LifeBuoy className="mr-2 size-4" />
             )}{" "}
-            Submit request
+            {t("support.submitBtn")}
           </Button>
         </div>
       </form>
 
       <section className="mt-8 space-y-2">
-        {(data ?? []).map((r) => (
-          <article key={r.id} className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
-            <span className="min-w-0 flex-1 truncate font-medium">{r.reason}</span>
-            <Badge variant="secondary" className="capitalize">
-              {r.status.replace(/_/g, " ")}
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              {toDate(r.createdAt ?? null)?.toLocaleDateString() ?? ""}
-            </span>
-          </article>
-        ))}
+        <h2 className="text-sm font-medium text-muted-foreground mb-3">
+          {t("support.requestsHistory")}
+        </h2>
+        {(data ?? []).length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("support.noRequests")}</p>
+        ) : (
+          (data ?? []).map((r) => (
+            <article key={r.id} className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
+              <span className="min-w-0 flex-1 truncate font-medium">{r.reason}</span>
+              <Badge variant="secondary" className="capitalize">
+                {r.status.replace(/_/g, " ")}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {toDate(r.createdAt ?? null)?.toLocaleDateString() ?? ""}
+              </span>
+            </article>
+          ))
+        )}
       </section>
 
       <Disclaimer />

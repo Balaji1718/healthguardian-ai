@@ -30,6 +30,8 @@ import { buildHealthContext } from "@/core/adaptive/context";
 import { toDate } from "@/services/firebase/repositories";
 import { SCORE_BANDS, ENABLE_ADAPTIVE_V2 } from "@/core/constants/health";
 
+import { useTranslation } from "@/locales/i18n";
+
 export const Route = createFileRoute("/app/dashboard")({
   component: Dashboard,
   head: () => ({
@@ -37,13 +39,12 @@ export const Route = createFileRoute("/app/dashboard")({
       { title: "Dashboard — HealthGuardian AI" },
       {
         name: "description",
-        content:
-          "Your General Health Score, recent check-ins and preventive health patterns at a glance.",
+        content: "Personalized health summary and adaptive biomarker patterns.",
       },
-      { property: "og:title", content: "HealthGuardian dashboard" },
+      { property: "og:title", content: "HealthGuardian Dashboard" },
       {
         property: "og:description",
-        content: "Your General Health Score and recent health patterns.",
+        content: "Track your vitals, score, and adaptive health baselines.",
       },
     ],
   }),
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/app/dashboard")({
 function Dashboard() {
   const uid = useUid();
   const online = useAppStore((s) => s.online);
+  const { t } = useTranslation();
   const { checkins, patterns, score, isLoading, isError, refetch } = useAnalysis(uid);
   const goals = useGoals(uid);
 

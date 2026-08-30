@@ -16,6 +16,7 @@ import {
 } from "@/services/notifications/notifications";
 import { toDate } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/notifications")({
   component: NotificationsPage,
@@ -35,19 +36,20 @@ export const Route = createFileRoute("/app/notifications")({
   }),
 });
 
-function NotificationsPage() {
+export function NotificationsPage() {
   const uid = useUid();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useNotificationsQuery(uid);
 
-  if (isLoading) return <LoadingState label="Loading notifications…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const enable = async () => {
     const res = await requestNotificationPermission();
-    if (res === "granted") toast.success("Browser notifications enabled.");
-    else if (res === "unsupported") toast.error("This browser does not support notifications.");
-    else toast.warning("Notifications stay in the app until you allow them in your browser.");
+    if (res === "granted") toast.success(t("common.success"));
+    else if (res === "unsupported") toast.error(t("common.error"));
+    else toast.warning(t("common.offlineNotice"));
   };
 
   const items = (data ?? []).filter((n) => n.status !== "dismissed");
@@ -56,14 +58,14 @@ function NotificationsPage() {
   return (
     <div>
       <PageHeader
-        title="Notifications"
-        description="Alerts are raised only from patterns in your own entries, and never contain sensitive clinical detail."
+        title={t("notifications.title")}
+        description={t("notifications.subtitle")}
         action={
           <div className="flex items-center gap-2">
             <ContextualHelp content="Alerts are for awareness, not emergency monitoring. Notifications never expose private clinical details." />
             {permission !== "granted" && (
               <Button variant="outline" onClick={() => void enable()}>
-                <BellRing className="mr-2 size-4" /> Enable browser alerts
+                <BellRing className="mr-2 size-4" /> {t("notifications.enableAlerts")}
               </Button>
             )}
           </div>
@@ -72,8 +74,8 @@ function NotificationsPage() {
 
       {items.length === 0 ? (
         <EmptyState
-          title="Nothing to show"
-          description="Reminders and pattern alerts will appear here as you use the app."
+          title={t("notifications.emptyTitle")}
+          description={t("notifications.emptyDesc")}
         />
       ) : (
         <ul className="space-y-2">
@@ -104,7 +106,7 @@ function NotificationsPage() {
                         await qc.invalidateQueries({ queryKey: ["notifications"] });
                       }}
                     >
-                      Mark read
+                      {t("notifications.markRead")}
                     </Button>
                   )}
                   <Button
@@ -115,7 +117,7 @@ function NotificationsPage() {
                       await qc.invalidateQueries({ queryKey: ["notifications"] });
                     }}
                   >
-                    Dismiss
+                    {t("notifications.dismiss")}
                   </Button>
                 </div>
               )}
@@ -124,11 +126,7 @@ function NotificationsPage() {
         </ul>
       )}
 
-      <Disclaimer>
-        Alerts appear while the app is open and, if you allow it, as browser notifications.
-        HealthGuardian does not provide emergency monitoring — in an emergency contact local
-        emergency services.
-      </Disclaimer>
+      <Disclaimer />
     </div>
   );
 }

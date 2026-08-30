@@ -83,9 +83,10 @@ app.post('/api/ai/search', async (req, res) => {
 
 app.post('/api/ai/extract-checkin', async (req, res) => {
   const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  const language = typeof req.body?.language === 'string' ? req.body.language : 'en';
   if (!text.trim()) return res.status(400).json({ ok: false, error: 'Text is required.' });
   try {
-    const result = await extractConversationalCheckin(text);
+    const result = await extractConversationalCheckin(text, language);
     return res.status(200).json(result);
   } catch {
     return res.status(500).json({ ok: false, error: 'Conversational extraction failed.' });
@@ -162,6 +163,8 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-server.listen(port, () => {
-  console.log(`HealthGuardian app running at http://localhost:${port}`);
+const host = process.env.HOST || '0.0.0.0';
+server.listen(port, host, () => {
+  console.log(`HealthGuardian app running on http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
 });
+

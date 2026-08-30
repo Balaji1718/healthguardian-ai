@@ -9,6 +9,7 @@ import { useUid } from "@/features/auth/useAuth";
 import { useGuidance } from "@/features/health/queries";
 import { acknowledgeGuidance, toDate } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/specialist")({
   component: SpecialistPage,
@@ -33,9 +34,10 @@ export function SpecialistPage() {
   const uid = useUid();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useGuidance(uid);
 
-  if (isLoading) return <LoadingState label="Loading specialist guidance…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   const items = data ?? [];
@@ -43,8 +45,8 @@ export function SpecialistPage() {
   return (
     <div>
       <PageHeader
-        title="Specialist guidance"
-        description="Structured suggestions regarding which category of healthcare professional you might consider discussing recurring patterns with during a routine visit."
+        title={t("specialist.title")}
+        description={t("specialist.subtitle")}
         action={
           <ContextualHelp content="Specialist Guidance is advisory and non-diagnostic. It does not replace clinical evaluation or make medical referrals." />
         }
@@ -54,21 +56,13 @@ export function SpecialistPage() {
       <div className="surface mb-6 p-4.5 border-primary/20 bg-primary/5 rounded-2xl flex items-start gap-3 text-xs text-muted-foreground">
         <Info className="size-4 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-semibold text-foreground">How Specialist Guidance Works</p>
-          <p className="leading-relaxed">
-            When HealthGuardian detects persistent patterns across your logged metrics (such as
-            sleep deviations or blood pressure trends), it highlights relevant medical specialties
-            (e.g. Cardiology, Endocrinology, Sleep Medicine) for your reference. It is strictly
-            non-diagnostic and non-referral.
-          </p>
+          <p className="font-semibold text-foreground">{t("specialist.howItWorksTitle")}</p>
+          <p className="leading-relaxed">{t("specialist.howItWorksDesc")}</p>
         </div>
       </div>
 
       {items.length === 0 ? (
-        <EmptyState
-          title="No suggestions yet"
-          description="Suggestions appear when HealthGuardian identifies a recurring pattern that may be worth discussing with a healthcare professional."
-        />
+        <EmptyState title={t("specialist.emptyTitle")} description={t("specialist.emptyDesc")} />
       ) : (
         <ul className="space-y-4">
           {items.map((g) => (
@@ -83,7 +77,7 @@ export function SpecialistPage() {
                       {g.suggestedSpecialty}
                     </h2>
                     <span className="text-[11px] text-muted-foreground">
-                      Advisory Discussion Category
+                      {t("specialist.advisoryCategory")}
                     </span>
                   </div>
                 </div>
@@ -99,7 +93,7 @@ export function SpecialistPage() {
                           : "border-primary/30 bg-primary/10 text-primary"
                     }`}
                   >
-                    {g.urgency} priority
+                    {g.urgency}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {toDate(g.createdAt ?? null)?.toLocaleDateString() ?? ""}
@@ -107,35 +101,29 @@ export function SpecialistPage() {
                 </div>
               </div>
 
-              {/* Advisory Wording */}
-              <p className="text-xs font-medium text-foreground">
-                Recurring pattern observed in your logged records. Consider discussing this pattern
-                with an appropriate healthcare professional.
-              </p>
-
               {/* Basis Details */}
               <div className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
-                <span className="font-semibold text-foreground block">Observed Basis:</span>
+                <span className="font-semibold text-foreground block">
+                  {t("specialist.clinicalBasis")}
+                </span>
                 <p className="leading-relaxed">{g.basis}</p>
               </div>
 
               {/* Actions & AI Assistant Relationship */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/40">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Need more explanation?</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 text-xs text-primary hover:text-primary hover:bg-primary/10 gap-1"
-                    onClick={() => void navigate({ to: "/app/assistant" })}
-                  >
-                    <Bot className="size-3.5" /> Ask AI Assistant
-                  </Button>
-                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                  onClick={() => void navigate({ to: "/app/assistant" })}
+                >
+                  <Bot className="size-3.5" /> {t("specialist.askAssistant")}
+                </Button>
 
                 {g.userAcknowledged ? (
                   <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
-                    <CheckCircle2 className="size-3.5 text-success" /> Acknowledged
+                    <CheckCircle2 className="size-3.5 text-success" />{" "}
+                    {t("specialist.acknowledged")}
                   </span>
                 ) : (
                   g.id && (
@@ -148,7 +136,7 @@ export function SpecialistPage() {
                         await qc.invalidateQueries({ queryKey: ["guidance"] });
                       }}
                     >
-                      <CheckCircle2 className="size-3" /> I've read this
+                      <CheckCircle2 className="size-3" /> {t("specialist.acknowledge")}
                     </Button>
                   )
                 )}
@@ -158,10 +146,7 @@ export function SpecialistPage() {
         </ul>
       )}
 
-      <Disclaimer>
-        These suggestions point to a category of care based on your logged patterns. They are not a
-        diagnosis, and urgent or severe symptoms always warrant immediate medical attention.
-      </Disclaimer>
+      <Disclaimer />
     </div>
   );
 }
