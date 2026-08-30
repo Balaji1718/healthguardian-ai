@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { GuideSection } from "./types";
+import { formatGuideButton, formatGuideCategory } from "@/locales/formatters";
+import { useTranslation } from "@/locales/i18n";
 
 interface GuideSectionCardProps {
   section: GuideSection;
@@ -28,6 +30,7 @@ interface GuideSectionCardProps {
 }
 
 export function GuideSectionCard({ section }: GuideSectionCardProps) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<string>("beginner");
 
   return (
@@ -42,10 +45,10 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
               variant="outline"
               className="font-mono text-xs font-semibold px-2.5 py-0.5 bg-primary/5 text-primary border-primary/20"
             >
-              Section {section.number}
+              {t("guide.section")} {section.number}
             </Badge>
             <Badge variant="secondary" className="text-[11px] capitalize">
-              {section.category.replace("_", " ")}
+              {formatGuideCategory(section.category, t)}
             </Badge>
           </div>
           {section.routeToOpen && (
@@ -56,7 +59,7 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
               className="h-7 gap-1 text-xs text-muted-foreground hover:text-primary"
             >
               <Link to={section.routeToOpen}>
-                <span>{section.buttonLabel || "Open feature"}</span>
+                <span>{formatGuideButton(section.routeToOpen, section.buttonLabel, t)}</span>
                 <ChevronRight className="size-3.5" />
               </Link>
             </Button>
@@ -75,13 +78,13 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-8 text-xs">
             <TabsTrigger value="beginner" className="text-xs">
-              Beginner
+              {t("guide.beginner")}
             </TabsTrigger>
             <TabsTrigger value="learnMore" className="text-xs">
-              Learn More
+              {t("guide.learnMore")}
             </TabsTrigger>
             <TabsTrigger value="technical" className="text-xs">
-              Technical Details
+              {t("guide.technicalDetails")}
             </TabsTrigger>
           </TabsList>
 
@@ -116,7 +119,7 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
         {section.keyPoints.length > 0 && (
           <div className="space-y-1.5 pt-1">
             <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Key Takeaways:
+              {t("guide.keyTakeaways")}
             </p>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {section.keyPoints.map((point, idx) => (
@@ -134,11 +137,11 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-primary mb-1">
               <Sparkles className="size-3.5 shrink-0" />
-              <span>Real Example</span>
+              <span>{t("guide.realExample")}</span>
             </div>
             <p className="text-foreground/90 font-medium">{section.exampleScenario.scenario}</p>
             <p className="text-muted-foreground mt-0.5">
-              <strong>Result:</strong> {section.exampleScenario.result}
+              <strong>{t("guide.result")}</strong> {section.exampleScenario.result}
             </p>
           </div>
         )}
@@ -148,7 +151,7 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
           <div className="rounded-lg border border-muted bg-card/40 p-3 text-xs space-y-1.5">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <Info className="size-3.5 text-muted-foreground" />
-              <span>What HealthGuardian Does NOT Do:</span>
+              <span>{t("guide.whatNotDo")}</span>
             </p>
             <div className="space-y-1">
               {section.whatItCannotDo.map((item, idx) => (
@@ -174,7 +177,7 @@ export function GuideSectionCard({ section }: GuideSectionCardProps) {
         <CardFooter className="pt-0 pb-4 flex justify-end">
           <Button size="sm" asChild className="gap-1.5 text-xs">
             <Link to={section.routeToOpen}>
-              <span>{section.buttonLabel || "Open feature"}</span>
+              <span>{formatGuideButton(section.routeToOpen, section.buttonLabel, t)}</span>
               <ArrowRight className="size-3.5" />
             </Link>
           </Button>

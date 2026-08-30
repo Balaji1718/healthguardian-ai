@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatSymptom } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 import type { CheckinSource, DailyCheckin } from "@/models";
 
@@ -80,7 +81,7 @@ export function CaptureReview({
     () => [
       {
         id: "date",
-        label: "Date",
+        label: t("history.tableDate"),
         value: date,
         hasValue: true,
         canExclude: false,
@@ -88,73 +89,75 @@ export function CaptureReview({
       },
       {
         id: "wellbeing",
-        label: "How you feel",
+        label: t("checkin.howYouFeel"),
         value: wellbeingObj
-          ? `${wellbeingObj.icon} ${wellbeingObj.label}`
-          : data.wellbeing || "Not specified",
+          ? `${wellbeingObj.icon} ${t(`wellbeing.${data.wellbeing}`) || wellbeingObj.label}`
+          : data.wellbeing
+            ? (t(`wellbeing.${data.wellbeing}`) || data.wellbeing)
+            : t("dashboard.notLogged"),
         hasValue: Boolean(data.wellbeing),
         canExclude: true,
         confidence: fieldConfidence.wellbeing || "high",
       },
       {
         id: "sleepHours",
-        label: "Sleep",
-        value: data.sleepHours != null ? `${data.sleepHours} hours` : "Not logged",
+        label: t("dashboard.sleep"),
+        value: data.sleepHours != null ? `${data.sleepHours} ${t("units.hours")}` : t("dashboard.notLogged"),
         hasValue: data.sleepHours != null,
         canExclude: true,
         confidence: fieldConfidence.sleepHours || "high",
       },
       {
         id: "waterGlasses",
-        label: "Water",
-        value: data.waterGlasses != null ? `${data.waterGlasses} glasses` : "Not logged",
+        label: t("dashboard.water"),
+        value: data.waterGlasses != null ? `${data.waterGlasses} ${t("units.glasses")}` : t("dashboard.notLogged"),
         hasValue: data.waterGlasses != null,
         canExclude: true,
         confidence: fieldConfidence.waterGlasses || "high",
       },
       {
         id: "exerciseMinutes",
-        label: "Exercise",
+        label: t("dashboard.exercise"),
         value:
           data.exerciseMinutes != null
-            ? `${data.exerciseMinutes} mins ${data.exerciseType ? `(${data.exerciseType})` : ""}`
-            : "Not logged",
+            ? `${data.exerciseMinutes} ${t("units.mins")} ${data.exerciseType ? `(${data.exerciseType})` : ""}`
+            : t("dashboard.notLogged"),
         hasValue: data.exerciseMinutes != null,
         canExclude: true,
         confidence: fieldConfidence.exerciseMinutes || "high",
       },
       {
         id: "weightKg",
-        label: "Weight",
-        value: data.weightKg != null ? `${data.weightKg} kg` : "Not logged",
+        label: t("dashboard.weight"),
+        value: data.weightKg != null ? `${data.weightKg} ${t("units.kg")}` : t("dashboard.notLogged"),
         hasValue: data.weightKg != null,
         canExclude: true,
         confidence: fieldConfidence.weightKg || "high",
       },
       {
         id: "bloodPressure",
-        label: "Blood pressure",
+        label: t("dashboard.bloodPressure"),
         value:
           data.systolicBP != null && data.diastolicBP != null
-            ? `${data.systolicBP}/${data.diastolicBP} mmHg`
-            : "Not logged",
+            ? `${data.systolicBP}/${data.diastolicBP} ${t("units.mmHg")}`
+            : t("dashboard.notLogged"),
         hasValue: data.systolicBP != null && data.diastolicBP != null,
         canExclude: true,
         confidence: fieldConfidence.systolicBP || "high",
       },
       {
         id: "bloodGlucose",
-        label: "Blood glucose",
+        label: t("dashboard.bloodGlucose"),
         value:
           data.bloodGlucose != null
             ? `${data.bloodGlucose} ${data.bloodGlucoseUnit || "mg/dL"}`
-            : "Not logged",
+            : t("dashboard.notLogged"),
         hasValue: data.bloodGlucose != null,
         canExclude: true,
         confidence: fieldConfidence.bloodGlucose || "high",
       },
     ],
-    [date, data, wellbeingObj, fieldConfidence],
+    [date, data, wellbeingObj, fieldConfidence, t],
   );
 
   // Compute final payload with only user-included fields
@@ -325,13 +328,17 @@ export function CaptureReview({
       {data.symptoms && data.symptoms.length > 0 && (
         <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-foreground">Logged symptoms:</span>
+            <span className="text-xs font-semibold text-foreground">
+              {t("review.loggedSymptoms") || "Logged symptoms:"}
+            </span>
             <button
               type="button"
               onClick={() => toggleField("symptoms")}
               className="text-[11px] text-primary hover:underline"
             >
-              {includedFields.symptoms ? "Exclude" : "Include"}
+              {includedFields.symptoms
+                ? (t("review.exclude") || "Exclude")
+                : (t("review.include") || "Include")}
             </button>
           </div>
           {includedFields.symptoms && (
@@ -342,7 +349,7 @@ export function CaptureReview({
                   variant="outline"
                   className="text-xs capitalize text-destructive border-destructive/30 bg-destructive/5 px-2 py-0.5"
                 >
-                  {sym.replace(/_/g, " ")}
+                  {formatSymptom(sym, t)}
                 </Badge>
               ))}
             </div>
@@ -354,13 +361,17 @@ export function CaptureReview({
       {data.notes && (
         <div className="space-y-1 rounded-xl bg-muted/40 p-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground block">Notes:</span>
+            <span className="font-semibold text-foreground block">
+              {t("checkin.notes")}:
+            </span>
             <button
               type="button"
               onClick={() => toggleField("notes")}
               className="text-[11px] text-primary hover:underline"
             >
-              {includedFields.notes ? "Exclude" : "Include"}
+              {includedFields.notes
+                ? (t("review.exclude") || "Exclude")
+                : (t("review.include") || "Include")}
             </button>
           </div>
           {includedFields.notes && (

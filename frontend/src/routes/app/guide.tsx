@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GUIDE_SECTIONS } from "@/features/guide/guide-data";
+import { getLocalizedGuideSections } from "@/features/guide/guide-translations";
 import { GuidedTourModal } from "@/features/guide/GuidedTourModal";
 import {
   AgenticDecisionDiagram,
@@ -46,14 +46,16 @@ export const Route = createFileRoute("/app/guide")({
 });
 
 function GuidePage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<GuideCategory | "all">("all");
   const [tourOpen, setTourOpen] = useState(false);
   const [activeTourStepIndex, setActiveTourStepIndex] = useState(0);
 
+  const localizedSections = useMemo(() => getLocalizedGuideSections(language), [language]);
+
   const filteredSections = useMemo(() => {
-    return GUIDE_SECTIONS.filter((section) => {
+    return localizedSections.filter((section) => {
       const matchesCategory = selectedCategory === "all" || section.category === selectedCategory;
       if (!matchesCategory) return false;
 
@@ -67,7 +69,7 @@ function GuidePage() {
         section.beginnerExplanation.toLowerCase().includes(query)
       );
     });
-  }, [searchQuery, selectedCategory]);
+  }, [localizedSections, searchQuery, selectedCategory]);
 
   const handleStartTour = () => {
     setActiveTourStepIndex(0);
@@ -97,12 +99,14 @@ function GuidePage() {
                 className="bg-background text-primary border-primary/20 text-xs font-semibold gap-1"
               >
                 <BookOpen className="size-3" />
-                <span>Interactive Learning System</span>
+                <span>{t("guide.interactiveLearning")}</span>
               </Badge>
-              <span className="text-xs text-muted-foreground">17 Topics Available</span>
+              <span className="text-xs text-muted-foreground">
+                {localizedSections.length} {t("guide.topicsAvailable")}
+              </span>
             </div>
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-              Master Your Preventive Health Journey
+              {t("guide.masterJourney")}
             </h2>
           </div>
           <Button
@@ -112,14 +116,12 @@ function GuidePage() {
             className="gap-1.5 self-start sm:self-auto text-xs"
           >
             <Sparkles className="size-3.5 text-primary" />
-            <span>2-Minute Walkthrough</span>
+            <span>{t("guide.twoMinuteWalkthrough")}</span>
           </Button>
         </div>
 
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-3xl">
-          HealthGuardian AI is designed to teach you how to build healthy consistency. Explore our
-          interactive flow diagrams, learn the difference between blank and zero entries, and
-          understand how your private AI assistant chooses the right tools for your questions.
+          {t("guide.welcomeBannerDesc")}
         </p>
 
         {/* Visual Architecture Highlight */}
@@ -133,7 +135,7 @@ function GuidePage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search topics (e.g. baseline, sleep, OCR, emergency)..."
+            placeholder={t("guide.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 text-xs sm:text-sm h-9"
@@ -144,14 +146,14 @@ function GuidePage() {
           <Filter className="size-3.5 text-muted-foreground shrink-0 hidden sm:block" />
           {(
             [
-              { id: "all", label: "All Topics" },
-              { id: "overview", label: "Overview" },
-              { id: "getting_started", label: "Getting Started" },
-              { id: "core_features", label: "Core Features" },
-              { id: "adaptive_ai", label: "Adaptive & AI" },
-              { id: "privacy_safety", label: "Privacy & Safety" },
+              { id: "all", labelKey: "guide.categories.all" },
+              { id: "overview", labelKey: "guide.categories.overview" },
+              { id: "getting_started", labelKey: "guide.categories.getting_started" },
+              { id: "core_features", labelKey: "guide.categories.core_features" },
+              { id: "adaptive_ai", labelKey: "guide.categories.adaptive_ai" },
+              { id: "privacy_safety", labelKey: "guide.categories.privacy_safety" },
             ] as const
-          ).map(({ id, label }) => {
+          ).map(({ id, labelKey }) => {
             const active = selectedCategory === id;
             return (
               <button
@@ -164,7 +166,7 @@ function GuidePage() {
                     : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                {label}
+                {t(labelKey)}
               </button>
             );
           })}
@@ -176,17 +178,21 @@ function GuidePage() {
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Deep-Dive Visual Explanations
+              {t("guide.deepDiveTitle")}
             </h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-foreground">Three-Layer Risk Architecture</p>
+              <p className="text-xs font-semibold text-foreground">
+                {t("guide.threeLayerTitle")}
+              </p>
               <ThreeLayerRiskDiagram />
             </div>
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-foreground">Controlled Agentic AI Loop</p>
+              <p className="text-xs font-semibold text-foreground">
+                {t("guide.agenticLoopTitle")}
+              </p>
               <AgenticDecisionDiagram />
             </div>
           </div>
@@ -197,7 +203,7 @@ function GuidePage() {
       <div className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Learning Sections ({filteredSections.length})
+            {t("guide.learningSections")} ({filteredSections.length})
           </h2>
           {searchQuery && (
             <Button
@@ -209,16 +215,16 @@ function GuidePage() {
               }}
               className="text-xs h-7 text-muted-foreground"
             >
-              Clear filters
+              {t("guide.clearFilters")}
             </Button>
           )}
         </div>
 
         {filteredSections.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center space-y-2">
-            <p className="text-sm font-medium text-foreground">No matching guide sections found</p>
+            <p className="text-sm font-medium text-foreground">{t("guide.noMatchingTitle")}</p>
             <p className="text-xs text-muted-foreground">
-              Try adjusting your search query or switching categories.
+              {t("guide.noMatchingDesc")}
             </p>
             <Button
               variant="outline"
@@ -226,7 +232,7 @@ function GuidePage() {
               onClick={() => setSearchQuery("")}
               className="mt-2 text-xs"
             >
-              View All Topics
+              {t("guide.viewAllTopics")}
             </Button>
           </div>
         ) : (
@@ -244,12 +250,10 @@ function GuidePage() {
           <ShieldAlert className="size-5 text-destructive shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <p className="text-xs sm:text-sm font-bold text-destructive">
-              Medical Safety & Emergency Notice
+              {t("guide.emergencyNoticeTitle")}
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              HealthGuardian AI is a preventive awareness tool and does not provide emergency
-              medical monitoring or diagnostic decisions. In case of acute symptoms, call local
-              emergency services immediately.
+              {t("guide.emergencyNoticeDesc")}
             </p>
           </div>
         </div>
@@ -259,7 +263,7 @@ function GuidePage() {
           onClick={handleStartTour}
           className="shrink-0 text-xs self-end sm:self-auto"
         >
-          Restart App Tour
+          {t("guide.restartAppTour")}
         </Button>
       </div>
 

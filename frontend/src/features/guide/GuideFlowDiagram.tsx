@@ -10,17 +10,20 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "@/locales/i18n";
 
 export function DataFlowDiagram() {
+  const { t } = useTranslation();
+
   return (
     <Card className="border-primary/20 bg-card/60 backdrop-blur">
       <CardContent className="p-4 sm:p-6">
         <div className="mb-3 flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            System Data Flow Architecture
+            {t("guide.diagram.dataFlow.systemArchitecture")}
           </span>
           <Badge variant="outline" className="text-xs font-normal">
-            No Missing Data Inventions
+            {t("guide.diagram.dataFlow.noInventions")}
           </Badge>
         </div>
 
@@ -31,9 +34,9 @@ export function DataFlowDiagram() {
               <User className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold">1. User Check-In</p>
+              <p className="text-xs font-semibold">{t("guide.diagram.dataFlow.step1Title")}</p>
               <p className="text-[11px] text-muted-foreground">
-                Sleep, water, exercise, symptoms & vitals
+                {t("guide.diagram.dataFlow.step1Desc")}
               </p>
             </div>
           </div>
@@ -47,9 +50,9 @@ export function DataFlowDiagram() {
               <Database className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold">2. Local Storage</p>
+              <p className="text-xs font-semibold">{t("guide.diagram.dataFlow.step2Title")}</p>
               <p className="text-[11px] text-muted-foreground">
-                Private Firestore & IndexedDB records
+                {t("guide.diagram.dataFlow.step2Desc")}
               </p>
             </div>
           </div>
@@ -63,9 +66,9 @@ export function DataFlowDiagram() {
               <Sparkles className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold">3. Adaptive Engine</p>
+              <p className="text-xs font-semibold">{t("guide.diagram.dataFlow.step3Title")}</p>
               <p className="text-[11px] text-muted-foreground">
-                Calculates median baseline & trends
+                {t("guide.diagram.dataFlow.step3Desc")}
               </p>
             </div>
           </div>
@@ -79,9 +82,9 @@ export function DataFlowDiagram() {
               <Bot className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold">4. Grounded AI</p>
+              <p className="text-xs font-semibold">{t("guide.diagram.dataFlow.step4Title")}</p>
               <p className="text-[11px] text-muted-foreground">
-                Explains trends using verified data only
+                {t("guide.diagram.dataFlow.step4Desc")}
               </p>
             </div>
           </div>
@@ -92,17 +95,22 @@ export function DataFlowDiagram() {
 }
 
 export function ThreeLayerRiskDiagram() {
+  const { t } = useTranslation();
+
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
         <div className="mb-2 flex items-center gap-2 text-destructive">
           <ShieldAlert className="size-4 shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wide">Layer 1: Safety Gate</span>
+          <span className="text-xs font-bold uppercase tracking-wide">
+            {t("guide.diagram.risk.layer1Badge")}
+          </span>
         </div>
-        <p className="text-xs font-medium text-foreground">Immediate Emergency Screening</p>
+        <p className="text-xs font-medium text-foreground">
+          {t("guide.diagram.risk.layer1Title")}
+        </p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-          Deterministic local filter for critical symptoms (chest pain, fainting). Immediately
-          suggests urgent emergency care.
+          {t("guide.diagram.risk.layer1Desc")}
         </p>
       </div>
 
@@ -110,13 +118,14 @@ export function ThreeLayerRiskDiagram() {
         <div className="mb-2 flex items-center gap-2 text-warning">
           <Database className="size-4 shrink-0" />
           <span className="text-xs font-bold uppercase tracking-wide">
-            Layer 2: Clinical Vitals
+            {t("guide.diagram.risk.layer2Badge")}
           </span>
         </div>
-        <p className="text-xs font-medium text-foreground">Standard Medical Thresholds</p>
+        <p className="text-xs font-medium text-foreground">
+          {t("guide.diagram.risk.layer2Title")}
+        </p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-          Evidence-based reference ranges for measured blood pressure and blood glucose to highlight
-          elevated readings.
+          {t("guide.diagram.risk.layer2Desc")}
         </p>
       </div>
 
@@ -124,13 +133,14 @@ export function ThreeLayerRiskDiagram() {
         <div className="mb-2 flex items-center gap-2 text-primary">
           <Sparkles className="size-4 shrink-0" />
           <span className="text-xs font-bold uppercase tracking-wide">
-            Layer 3: Wellness Baseline
+            {t("guide.diagram.risk.layer3Badge")}
           </span>
         </div>
-        <p className="text-xs font-medium text-foreground">Personal Adaptive Intelligence</p>
+        <p className="text-xs font-medium text-foreground">
+          {t("guide.diagram.risk.layer3Title")}
+        </p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-          Compares recent 3-day habits against your historical median (sleep, hydration, activity).
-          Adapts to your individual normal.
+          {t("guide.diagram.risk.layer3Desc")}
         </p>
       </div>
     </div>
@@ -138,17 +148,19 @@ export function ThreeLayerRiskDiagram() {
 }
 
 export function AgenticDecisionDiagram() {
+  const { t } = useTranslation();
+
   return (
     <Card className="border border-muted bg-card/60">
       <CardContent className="p-4 sm:p-6">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Agentic AI: Controlled & Grounded Decision Flow
+          {t("guide.diagram.agent.title")}
         </p>
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2 rounded-md bg-background p-2.5 border">
-            <span className="font-semibold text-primary">User Question:</span>
+            <span className="font-semibold text-primary">{t("guide.diagram.agent.userQuestionLabel")}</span>
             <span className="text-muted-foreground italic">
-              "Do I already have a hydration goal?"
+              {t("guide.diagram.agent.sampleQuestion")}
             </span>
           </div>
 
@@ -157,10 +169,9 @@ export function AgenticDecisionDiagram() {
           </div>
 
           <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
-            <p className="font-semibold text-foreground">1. Dynamic Tool Selection</p>
+            <p className="font-semibold text-foreground">{t("guide.diagram.agent.step1Title")}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              The AI selects <code className="text-primary font-mono text-[11px]">getGoals()</code>{" "}
-              specifically—skipping unnecessary medical or risk tools.
+              {t("guide.diagram.agent.step1Desc")}
             </p>
           </div>
 
@@ -169,10 +180,9 @@ export function AgenticDecisionDiagram() {
           </div>
 
           <div className="rounded-md border bg-background p-3">
-            <p className="font-semibold text-foreground">2. Result Inspection & Verification</p>
+            <p className="font-semibold text-foreground">{t("guide.diagram.agent.step2Title")}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Agent inspects the returned goal list. If sufficient, it generates the final answer
-              immediately without redundant loops.
+              {t("guide.diagram.agent.step2Desc")}
             </p>
           </div>
 
@@ -183,8 +193,8 @@ export function AgenticDecisionDiagram() {
           <div className="flex items-center gap-2 rounded-md bg-emerald-500/10 border border-emerald-500/30 p-2.5 text-emerald-800 dark:text-emerald-300">
             <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <span>
-              <strong>Write Protection:</strong> Any action that modifies data (e.g. creating a
-              goal) triggers an explicit user confirmation prompt.
+              <strong>{t("guide.diagram.agent.writeProtectionLabel")}</strong>{" "}
+              {t("guide.diagram.agent.writeProtectionDesc")}
             </span>
           </div>
         </div>

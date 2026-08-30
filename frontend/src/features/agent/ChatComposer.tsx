@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/locales/i18n";
 
 interface ChatComposerProps {
   input: string;
@@ -31,6 +32,7 @@ export function ChatComposer({
   attachedReport,
   onRemoveAttachment,
 }: ChatComposerProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus input on mount
@@ -95,8 +97,8 @@ export function ChatComposer({
             disabled={!online || busy}
             placeholder={
               online
-                ? "Ask about your trends, health goals, or public health guidelines…"
-                : "You are offline — connect to the internet to ask the assistant."
+                ? t("assistant.composerPlaceholder")
+                : t("common.offlineNotice")
             }
             className="min-h-[44px] max-h-36 resize-none border-0 bg-transparent px-3 py-1.5 text-sm shadow-none focus-visible:ring-0 focus-visible:outline-none placeholder:text-muted-foreground/70"
           />
@@ -127,7 +129,7 @@ export function ChatComposer({
                     webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground",
                   )}
                 />
-                <span>Web Search</span>
+                <span>{t("assistant.webSearch")}</span>
                 {webSearchEnabled && (
                   <span className="ml-0.5 size-1.5 rounded-full bg-emerald-300 animate-pulse" />
                 )}
@@ -148,8 +150,7 @@ export function ChatComposer({
         </form>
 
         <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
-          HealthGuardian AI answers strictly from your permitted records and verified health
-          guidelines. Non-diagnostic.
+          {t("assistant.disclaimer")}
         </p>
       </div>
     </div>

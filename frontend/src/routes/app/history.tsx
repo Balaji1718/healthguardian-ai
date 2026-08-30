@@ -15,6 +15,7 @@ import { useUid } from "@/features/auth/useAuth";
 import { useCheckins } from "@/features/health/queries";
 import { toDate } from "@/services/firebase/repositories";
 import { cn } from "@/lib/utils";
+import { formatSymptom } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/history")({
@@ -169,7 +170,9 @@ export function History() {
                       {c.exerciseMinutes != null ? `${c.exerciseMinutes}m` : "—"}
                     </td>
                     <td className="px-4 py-2.5 capitalize text-muted-foreground">
-                      {c.symptoms?.length ? c.symptoms.join(", ").replace(/_/g, " ") : "—"}
+                      {c.symptoms?.length
+                        ? c.symptoms.map((s) => formatSymptom(s, t)).join(", ")
+                        : "—"}
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">

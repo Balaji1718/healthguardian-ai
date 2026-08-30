@@ -30,6 +30,12 @@ import { buildHealthContext } from "@/core/adaptive/context";
 import { toDate } from "@/services/firebase/repositories";
 import { SCORE_BANDS, ENABLE_ADAPTIVE_V2 } from "@/core/constants/health";
 
+import {
+  formatAdaptiveSignal,
+  formatGoalTitle,
+  formatPatternDetail,
+  formatScoreContribution,
+} from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/dashboard")({
@@ -72,20 +78,20 @@ function Dashboard() {
   const doneToday = checkins.some((c) => toDate(c.date)?.toDateString() === today);
   const last = checkins[0];
 
-  if (isLoading) return <LoadingState label="Loading your health summary…" />;
+  if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
 
   return (
     <div>
       {!online && <OfflineNotice />}
       <PageHeader
-        title="Your health summary"
-        description="Everything here is computed from what you logged. Nothing is assumed or filled in for you."
+        title={t("dashboard.title")}
+        description={t("dashboard.subtitle")}
         action={
           <Button asChild>
             <Link to="/app/checkin">
               <CalendarCheck className="mr-2 size-4" />
-              {doneToday ? "Update today" : "Daily check-in"}
+              {doneToday ? t("dashboard.updateToday") : t("dashboard.logNow")}
             </Link>
           </Button>
         }
@@ -93,11 +99,11 @@ function Dashboard() {
 
       {checkins.length === 0 ? (
         <EmptyState
-          title="No check-ins yet"
-          description="Your score and patterns appear after your first daily check-in. It takes about a minute."
+          title={t("dashboard.noCheckinsYetTitle")}
+          description={t("dashboard.noCheckinsYetDesc")}
           action={
             <Button asChild className="mt-2">
-              <Link to="/app/checkin">Start your first check-in</Link>
+              <Link to="/app/checkin">{t("dashboard.startFirstCheckin")}</Link>
             </Button>
           }
         />
@@ -105,19 +111,20 @@ function Dashboard() {
         <div className="grid gap-4 md:grid-cols-3">
           <section className="surface p-6 md:col-span-2">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-sm font-medium text-muted-foreground">General Health Score</h2>
-              <Badge variant="secondary">{SCORE_BANDS[score.band]}</Badge>
+              <h2 className="text-sm font-medium text-muted-foreground">{t("dashboard.scoreTitle")}</h2>
+              <Badge variant="secondary">
+                {t(`dashboard.bands.${score.band}`) || SCORE_BANDS[score.band]}
+              </Badge>
             </div>
             <p className="mt-2 text-5xl font-semibold tracking-tight">{score.score}</p>
             <Progress value={score.score} className="mt-4" />
             <p className="mt-3 text-xs text-muted-foreground">
-              A wellness indicator based on your logged habits and readings — not a medical or
-              diagnostic score.
+              {t("dashboard.scoreDisclaimer")}
             </p>
             <ul className="mt-4 space-y-1.5 text-sm">
               {score.contributions.slice(0, 5).map((c, i) => (
                 <li key={i} className="flex items-start justify-between gap-3">
-                  <span className="text-muted-foreground">{c.label}</span>
+                  <span className="text-muted-foreground">{formatScoreContribution(c, t)}</span>
                   <span className={c.delta < 0 ? "text-destructive" : "text-success"}>
                     {c.delta > 0 ? `+${c.delta}` : c.delta}
                   </span>
@@ -127,23 +134,23 @@ function Dashboard() {
           </section>
 
           <section className="surface p-6">
-            <h2 className="text-sm font-medium text-muted-foreground">Most recent entry</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">{t("dashboard.recentEntry")}</h2>
             <p className="mt-1 text-sm">{last ? toDate(last.date)?.toLocaleDateString() : "—"}</p>
             <dl className="mt-4 space-y-3 text-sm">
               <Metric
                 icon={Moon}
-                label="Sleep"
-                value={last?.sleepHours != null ? `${last.sleepHours} h` : "Not logged"}
+                label={t("dashboard.sleep")}
+                value={last?.sleepHours != null ? `${last.sleepHours} h` : t("dashboard.notLogged")}
               />
               <Metric
                 icon={Droplets}
-                label="Water"
-                value={last?.waterGlasses != null ? `${last.waterGlasses} glasses` : "Not logged"}
+                label={t("dashboard.water")}
+                value={last?.waterGlasses != null ? `${last.waterGlasses} ${t("units.glasses")}` : t("dashboard.notLogged")}
               />
               <Metric
                 icon={Footprints}
-                label="Exercise"
-                value={last?.exerciseMinutes != null ? `${last.exerciseMinutes} min` : "Not logged"}
+                label={t("dashboard.exercise")}
+                value={last?.exerciseMinutes != null ? `${last.exerciseMinutes} ${t("units.mins")}` : t("dashboard.notLogged")}
               />
             </dl>
           </section>
@@ -151,10 +158,10 @@ function Dashboard() {
           <section className="surface p-6 md:col-span-2">
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Activity className="size-4" /> Patterns detected
+                <Activity className="size-4" /> {t("dashboard.patternsDetected")}
               </h2>
               <Link to="/app/risk" className="text-sm text-primary hover:underline">
-                View all
+                {t("dashboard.viewAll")}
               </Link>
             </div>
             {ENABLE_ADAPTIVE_V2 && adaptiveInsights.length > 0 && (
@@ -164,15 +171,14 @@ function Dashboard() {
                     key={idx}
                     className="flex items-start gap-3 rounded-lg border-l-4 border-primary bg-muted/40 px-3 py-2.5 text-sm text-foreground font-medium"
                   >
-                    <span>{insight}</span>
+                    <span>{formatAdaptiveSignal(insight, t)}</span>
                   </div>
                 ))}
               </div>
             )}
             {patterns.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
-                No notable patterns in your recent entries. Keep logging so trends can be seen over
-                time.
+                {t("dashboard.noPatterns")}
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
@@ -188,7 +194,7 @@ function Dashboard() {
                           : "mt-1.5 size-2 shrink-0 rounded-full bg-warning"
                       }
                     />
-                    <span>{p.detail}</span>
+                    <span>{formatPatternDetail(p, t)}</span>
                   </li>
                 ))}
               </ul>
@@ -197,10 +203,10 @@ function Dashboard() {
 
           <section className="surface p-6">
             <h2 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Target className="size-4" /> Active goals
+              <Target className="size-4" /> {t("dashboard.activeGoals")}
             </h2>
             {(goals.data ?? []).filter((g) => g.status === "active").length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">No active goals yet.</p>
+              <p className="mt-3 text-sm text-muted-foreground">{t("dashboard.noActiveGoals")}</p>
             ) : (
               <ul className="mt-3 space-y-3">
                 {(goals.data ?? [])
@@ -208,7 +214,7 @@ function Dashboard() {
                   .slice(0, 3)
                   .map((g) => (
                     <li key={g.id}>
-                      <p className="text-sm font-medium">{g.title}</p>
+                      <p className="text-sm font-medium">{formatGoalTitle(g.title, t)}</p>
                       <Progress
                         className="mt-1.5"
                         value={
@@ -221,7 +227,7 @@ function Dashboard() {
             )}
             <Button asChild variant="ghost" size="sm" className="mt-4 px-0">
               <Link to="/app/goals">
-                Manage goals <ArrowRight className="ml-1 size-4" />
+                {t("dashboard.manageGoals")} <ArrowRight className="ml-1 size-4" />
               </Link>
             </Button>
           </section>

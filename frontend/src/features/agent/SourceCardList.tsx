@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ExternalLink, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/locales/i18n";
 import type { WebSource } from "./agent";
 
 interface SourceCardListProps {
@@ -12,6 +13,7 @@ interface SourceCardListProps {
  * Displays a collapsed summary pill that expands into clean source cards.
  */
 export function SourceCardList({ sources }: SourceCardListProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   if (!sources || sources.length === 0) return null;
@@ -27,7 +29,7 @@ export function SourceCardList({ sources }: SourceCardListProps) {
         >
           <Globe className="size-3.5 text-primary" />
           <span>
-            Web search used · {sources.length} {sources.length === 1 ? "source" : "sources"}
+            {t("assistant.webSearchUsedPill", { count: sources.length }) || `Web search used · ${sources.length} sources`}
           </span>
           <ChevronDown
             className={`size-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -35,7 +37,7 @@ export function SourceCardList({ sources }: SourceCardListProps) {
         </button>
 
         <span className="text-[11px] text-muted-foreground hidden sm:inline">
-          Public reference data
+          {t("assistant.publicReferenceData")}
         </span>
       </div>
 
@@ -75,7 +77,7 @@ export function SourceCardList({ sources }: SourceCardListProps) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
                 >
-                  Open source <ExternalLink className="size-2.5" />
+                  {t("assistant.openSource")} <ExternalLink className="size-2.5" />
                 </a>
               </div>
             </div>

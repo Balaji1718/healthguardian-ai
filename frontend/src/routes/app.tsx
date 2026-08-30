@@ -6,6 +6,8 @@ import { useAuthListener } from "@/features/auth/useAuth";
 import { isFirebaseConfigured } from "@/services/firebase/config";
 import { FirebaseSetupNotice } from "@/components/common/FirebaseSetupNotice";
 
+import { useTranslation } from "@/locales/i18n";
+
 export const Route = createFileRoute("/app")({
   // Firebase auth state lives in the browser; the protected shell is client-rendered.
   ssr: false,
@@ -28,6 +30,7 @@ function AppLayout() {
   const { user, loading } = useAuthListener();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!loading && !user && isFirebaseConfigured && location.pathname !== "/auth") {
@@ -39,7 +42,7 @@ function AppLayout() {
   if (loading || !user)
     return (
       <div className="p-10">
-        <LoadingState label="Checking your session…" />
+        <LoadingState label={t("auth.checkingSession") || "Checking your session…"} />
       </div>
     );
 

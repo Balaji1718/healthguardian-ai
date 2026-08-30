@@ -16,6 +16,11 @@ import {
 } from "@/services/notifications/notifications";
 import { toDate } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import {
+  formatNotificationMessage,
+  formatNotificationPriority,
+  formatNotificationTitle,
+} from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/notifications")({
@@ -83,8 +88,8 @@ export function NotificationsPage() {
             <li key={n.id} className="surface flex flex-wrap items-start gap-3 p-4">
               <Bell className="mt-0.5 size-4 text-primary" />
               <div className="min-w-0 flex-1">
-                <p className="font-medium">{n.title}</p>
-                <p className="text-sm text-muted-foreground">{n.message}</p>
+                <p className="font-medium">{formatNotificationTitle(n, t)}</p>
+                <p className="text-sm text-muted-foreground">{formatNotificationMessage(n, t)}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {toDate(n.createdAt ?? null)?.toLocaleString() ?? ""}
                 </p>
@@ -93,7 +98,7 @@ export function NotificationsPage() {
                 variant={n.priority === "high" ? "destructive" : "secondary"}
                 className="capitalize"
               >
-                {n.priority}
+                {formatNotificationPriority(n.priority, t)}
               </Badge>
               {n.id && (
                 <div className="flex gap-1">

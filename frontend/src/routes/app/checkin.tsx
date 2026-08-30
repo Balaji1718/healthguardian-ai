@@ -30,6 +30,7 @@ import { checkinIdForDate, getCheckin, saveCheckin } from "@/services/firebase/r
 import { useUid } from "@/features/auth/useAuth";
 import { useAppStore } from "@/store/app";
 import { cn } from "@/lib/utils";
+import { formatSymptom } from "@/locales/formatters";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
 import { CaptureReview } from "@/features/checkin/CaptureReview";
 import { extractCheckinFromText } from "@/services/ai/conversational-checkin";
@@ -479,30 +480,28 @@ function Checkin() {
           <div className="grid gap-3 sm:grid-cols-3 pt-4 text-xs text-muted-foreground">
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Mic className="size-3.5 text-primary" /> Multilingual Voice
+                <Mic className="size-3.5 text-primary" /> {t("checkin.features.multilingualVoiceTitle")}
               </span>
               <p className="text-[11px] leading-relaxed">
-                Dictate naturally in English or தமிழ். Live waveform with pause & review before
-                extraction.
+                {t("checkin.features.multilingualVoiceDesc")}
               </p>
             </div>
 
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-primary" /> Natural Typing
+                <Sparkles className="size-3.5 text-primary" /> {t("checkin.features.naturalTypingTitle")}
               </span>
               <p className="text-[11px] leading-relaxed">
-                "Slept 7 hours, drank 6 glasses of water and walked 30 min". No rigid mode switches.
+                {t("checkin.features.naturalTypingDesc")}
               </p>
             </div>
 
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <FileText className="size-3.5 text-primary" /> Folder & OCR
+                <FileText className="size-3.5 text-primary" /> {t("checkin.features.folderOcrTitle")}
               </span>
               <p className="text-[11px] leading-relaxed">
-                Connect a local health folder for instant client-side scan of lab PDFs and health
-                logs.
+                {t("checkin.features.folderOcrDesc")}
               </p>
             </div>
           </div>
@@ -680,10 +679,10 @@ function Checkin() {
 
           {/* Vitals & Biomarkers */}
           <section className="surface space-y-4 p-6 rounded-2xl border">
-            <h2 className="font-semibold text-sm text-foreground">Vitals & Readings</h2>
+            <h2 className="font-semibold text-sm text-foreground">{t("dashboard.recentVitals")}</h2>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label htmlFor="weightKg">Weight (kg)</Label>
+                <Label htmlFor="weightKg">{t("dashboard.weight")} (kg)</Label>
                 <Input
                   id="weightKg"
                   type="number"
@@ -698,7 +697,7 @@ function Checkin() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="systolicBP">Systolic BP (mmHg)</Label>
+                <Label htmlFor="systolicBP">{t("dashboard.bloodPressure")} (Systolic mmHg)</Label>
                 <Input
                   id="systolicBP"
                   type="number"
@@ -712,7 +711,7 @@ function Checkin() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="diastolicBP">Diastolic BP (mmHg)</Label>
+                <Label htmlFor="diastolicBP">{t("dashboard.bloodPressure")} (Diastolic mmHg)</Label>
                 <Input
                   id="diastolicBP"
                   type="number"
@@ -728,7 +727,7 @@ function Checkin() {
 
             <div className="grid gap-4 sm:grid-cols-2 pt-2">
               <div className="space-y-1.5">
-                <Label htmlFor="bloodGlucose">Blood glucose</Label>
+                <Label htmlFor="bloodGlucose">{t("dashboard.bloodGlucose")}</Label>
                 <Input
                   id="bloodGlucose"
                   type="number"
@@ -759,7 +758,7 @@ function Checkin() {
 
           {/* Symptoms */}
           <section className="surface space-y-4 p-6 rounded-2xl border">
-            <h2 className="font-semibold text-sm text-foreground">Symptoms</h2>
+            <h2 className="font-semibold text-sm text-foreground">{t("checkin.symptoms")}</h2>
             <div className="flex flex-wrap gap-1.5">
               {COMMON_SYMPTOMS.map((s) => {
                 const active = symptoms.includes(s);
@@ -775,7 +774,7 @@ function Checkin() {
                         : "hover:bg-muted text-muted-foreground",
                     )}
                   >
-                    {s.replace(/_/g, " ")}
+                    {formatSymptom(s, t)}
                   </button>
                 );
               })}
@@ -784,7 +783,7 @@ function Checkin() {
 
           {/* Notes */}
           <section className="surface space-y-4 p-6 rounded-2xl border">
-            <h2 className="font-semibold text-sm text-foreground">Notes</h2>
+            <h2 className="font-semibold text-sm text-foreground">{t("checkin.notes")}</h2>
             <Textarea
               id="notes"
               rows={3}

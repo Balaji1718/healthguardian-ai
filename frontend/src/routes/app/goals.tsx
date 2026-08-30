@@ -16,6 +16,7 @@ import { goalSchema } from "@/core/validation/schemas";
 import { GOAL_TYPES } from "@/core/constants/health";
 import { createGoal, updateGoal } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { formatGoalProgress, formatGoalTitle } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/goals")({
@@ -200,20 +201,17 @@ export function GoalsPage() {
             <li key={g.id} className="surface p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="flex items-center gap-2 font-medium">
-                  <Target className="size-4 text-primary" /> {g.title}
+                  <Target className="size-4 text-primary" /> {formatGoalTitle(g.title, t)}
                 </span>
                 <Badge
                   variant={g.status === "active" ? "default" : "secondary"}
                   className="capitalize"
                 >
-                  {g.status}
+                  {t(`goals.status.${g.status}`) || g.status}
                 </Badge>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                {g.frequency} ·{" "}
-                {g.targetValue != null
-                  ? `${g.progressValue}/${g.targetValue} ${g.unit ?? ""}`
-                  : "no numeric target"}
+                {formatGoalProgress(g, t)}
               </p>
               {g.targetValue != null && (
                 <Progress

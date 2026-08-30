@@ -36,7 +36,32 @@
     "dark": "Dark",
     "system": "System",
     "offlineNotice": "You are offline. Cached information is shown and new entries will sync when you reconnect.",
-    "disclaimer": "HealthGuardian AI supports preventive health awareness only. It does not diagnose conditions, prescribe or change medication, and it does not replace a qualified healthcare professional."
+    "disclaimer": "HealthGuardian AI supports preventive health awareness only. It does not diagnose conditions, prescribe or change medication, and it does not replace a qualified healthcare professional.",
+    "medicalDisclaimer": "HealthGuardian AI supports preventive health awareness only. It does not diagnose conditions, prescribe or change medication, and it does not replace a qualified healthcare professional.",
+    "saveChanges": "Save changes",
+    "exportEverything": "Export everything (JSON)",
+    "deleteAllHealthData": "Delete all health data",
+    "signOut": "Sign out",
+    "deleteAccount": "Delete account",
+    "deleteYourAccount": "Delete your account",
+    "confirmWithPassword": "Confirm with your password",
+    "deleteAccountNotice": "This removes your account, all Firestore records and every document stored in this browser. It cannot be undone.",
+    "aboutYou": "About you",
+    "healthBackground": "Health background",
+    "healthBackgroundDisclaimer": "Used for context only. HealthGuardian never changes, suggests or interprets your medication.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "gender": "Gender",
+    "heightCm": "Height (cm)",
+    "knownConditions": "Known conditions (comma separated)",
+    "allergies": "Allergies",
+    "familyHistory": "Family history",
+    "currentMedications": "Current medications",
+    "bloodGroup": "Blood group",
+    "emergencyNotes": "Emergency notes",
+    "appearanceTheme": "Appearance & Theme",
+    "appearanceThemeDesc": "Choose your interface preference: Light, Dark, or automatically match your System color scheme.",
+    "yourData": "Your data"
   },
   "landing": {
     "tagline": "Preventive health, not diagnosis",
@@ -72,6 +97,7 @@
   "auth": {
     "welcome": "Welcome to HealthGuardian AI",
     "subtitle": "Your private, adaptive health intelligence companion",
+    "fullName": "Full name",
     "signIn": "Sign In",
     "createAccount": "Create Account",
     "email": "Email address",
@@ -97,8 +123,18 @@
   },
   "dashboard": {
     "greeting": "Welcome back",
-    "title": "Your Health Overview",
-    "subtitle": "Track your daily vitals, patterns, and intelligent insights.",
+    "title": "Your health summary",
+    "subtitle": "Everything here is computed from what you logged. Nothing is assumed or filled in for you.",
+    "scoreTitle": "General Health Score",
+    "scoreDisclaimer": "A wellness indicator based on your logged habits and readings — not a medical or diagnostic score.",
+    "recentEntry": "Most recent entry",
+    "patternsDetected": "Patterns detected",
+    "viewAll": "View all",
+    "activeGoals": "Active goals",
+    "manageGoals": "Manage goals",
+    "noActiveGoals": "No active goals yet.",
+    "notLogged": "Not logged",
+    "noPatterns": "No notable patterns in your recent entries. Keep logging so trends can be seen over time.",
     "quickCheckin": "Quick Check-in",
     "viewHistory": "View History",
     "askAssistant": "Ask Assistant",
@@ -110,12 +146,31 @@
     "bloodGlucose": "Blood Glucose",
     "weight": "Weight",
     "noCheckinToday": "You haven't logged your check-in today yet.",
-    "logNow": "Log today's check-in",
+    "logNow": "Daily check-in",
+    "updateToday": "Update today",
+    "startFirstCheckin": "Start your first check-in",
+    "noCheckinsYetTitle": "No check-ins yet",
+    "noCheckinsYetDesc": "Your score and patterns appear after your first daily check-in. It takes about a minute.",
     "hours": "hours",
     "glasses": "glasses",
     "minutes": "mins",
     "adaptiveInsight": "Adaptive Health Intelligence",
-    "baselineSummary": "Your personalized adaptive baselines are active and monitoring trends."
+    "baselineSummary": "Your personalized adaptive baselines are active and monitoring trends.",
+    "bands": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "attention": "Attention"
+    },
+    "contributions": {
+      "sleepLower": "Recent sleep is {dev}h lower than your usual pattern of {baseline}h.",
+      "activityBelow": "Recent activity is {dev} min/day below your usual pattern of {baseline} min.",
+      "waterBelow": "Recent water intake is {dev} glasses below your usual pattern of {baseline} glasses.",
+      "checkinsCount": "{count} check-ins in the last week",
+      "sleepConsistent": "Sleep duration has been consistent with your baseline",
+      "hydrationMet": "Hydration target met consistently",
+      "activityTargetMet": "Activity baseline maintained"
+    }
   },
   "checkin": {
     "title": "Daily Health Check-in",
@@ -144,7 +199,15 @@
     "wellbeingGood": "Good",
     "wellbeingOkay": "Okay",
     "wellbeingTired": "Tired",
-    "wellbeingNotGreat": "Not great"
+    "wellbeingNotGreat": "Not great",
+    "features": {
+      "multilingualVoiceTitle": "Multilingual Voice",
+      "multilingualVoiceDesc": "Dictate naturally in English, தமிழ் or हिन्दी. Live waveform with pause & review before extraction.",
+      "naturalTypingTitle": "Natural Typing",
+      "naturalTypingDesc": "\"Slept 7 hours, drank 6 glasses of water and walked 30 min\". No rigid mode switches.",
+      "folderOcrTitle": "Folder & OCR",
+      "folderOcrDesc": "Connect a local health folder for instant client-side scan of lab PDFs and health logs."
+    }
   },
   "review": {
     "gateTitle": "Review today's check-in",
@@ -288,15 +351,43 @@
     "sourceOcr": "OCR Document"
   },
   "assistant": {
-    "title": "AI Health Assistant",
-    "subtitle": "Ask questions about your health history, vitals, and lifestyle guidelines.",
-    "placeholder": "Ask a health question (e.g., How has my sleep been this week?)...",
+    "title": "AI Assistant",
+    "subtitle": "Your health information assistant",
+    "controlledAgentic": "Controlled Agentic",
+    "welcomeHeading": "How can I help with your health data today?",
+    "welcomeSubtext": "Ask about your sleep, hydration, exercise patterns, lab reports, or look up verified public health recommendations.",
+    "composerPlaceholder": "Ask about your trends, health goals, or public health guidelines...",
+    "webSearch": "Web Search",
+    "disclaimer": "HealthGuardian AI answers strictly from your permitted records and verified health guidelines. Non-diagnostic.",
+    "placeholder": "Ask about your trends, health goals, or public health guidelines...",
     "send": "Send",
-    "webSearch": "Web Search (Public Guidelines)",
     "thinking": "Thinking…",
-    "suggested1": "How has my sleep and hydration been lately?",
-    "suggested2": "What are normal healthy blood pressure guidelines?",
-    "suggested3": "Summarize my recent exercise patterns."
+    "starterPrompts": {
+      "weeklyOverview": {
+        "label": "Weekly Overview",
+        "prompt": "How have I been doing this week based on my check-ins?"
+      },
+      "sleepTrends": {
+        "label": "Sleep Trends",
+        "prompt": "How has my sleep changed compared to my baseline?"
+      },
+      "medicalReports": {
+        "label": "Medical Reports",
+        "prompt": "Explain my latest medical report in simple terms."
+      },
+      "activeGoals": {
+        "label": "Active Goals",
+        "prompt": "What are my current active health goals and progress?"
+      },
+      "activityGuidelines": {
+        "label": "Activity Guidelines",
+        "prompt": "What are the latest public health guidelines for daily physical activity?"
+      },
+      "hydrationAdvice": {
+        "label": "Hydration Advice",
+        "prompt": "What is the recommended daily water intake for adults?"
+      }
+    }
   },
   "goals": {
     "title": "Health Goals",
@@ -316,7 +407,19 @@
     "markComplete": "Mark complete",
     "deleteGoal": "Delete goal",
     "emptyTitle": "No active goals",
-    "emptyDesc": "Set a goal to keep yourself accountable for sleep, hydration, or exercise."
+    "emptyDesc": "Set a goal to keep yourself accountable for sleep, hydration, or exercise.",
+    "frequencyDaily": "daily",
+    "frequencyWeekly": "weekly",
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "paused": "Paused"
+    },
+    "templates": {
+      "drinkWater": "Drink 8 glasses of water",
+      "walkDaily": "Daily 30 min brisk walk",
+      "sleepRegular": "Sleep 7-8 hours consistently"
+    }
   },
   "notifications": {
     "title": "Notifications",
@@ -325,7 +428,23 @@
     "markRead": "Mark read",
     "dismiss": "Dismiss",
     "emptyTitle": "Nothing to show",
-    "emptyDesc": "Reminders and pattern alerts will appear here as you use the app."
+    "emptyDesc": "Reminders and pattern alerts will appear here as you use the app.",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "templates": {
+      "activityDecreasedTitle": "Your physical activity has decreased",
+      "activityDecreasedBody": "Your daily active minutes have been below your usual pattern recently.",
+      "patternAttentionTitle": "Something in your health data may need attention",
+      "patternAttentionBody": "Open HealthGuardian to review the pattern we noticed in your recent entries.",
+      "sleepChangingTitle": "Your sleep pattern is changing",
+      "sleepChangingBody": "Your sleep has been below your usual pattern recently. Open HealthGuardian to review your trend.",
+      "hydrationLowerTitle": "Your hydration levels are lower",
+      "hydrationLowerBody": "Your water intake has been below your usual baseline recently."
+    }
   },
   "specialist": {
     "title": "Specialist Guidance",
@@ -351,11 +470,29 @@
     "details": "Details",
     "submitBtn": "Submit request",
     "requestsHistory": "Your Support Requests",
-    "noRequests": "No support requests recorded yet."
+    "noRequests": "No support requests recorded yet.",
+    "types": {
+      "question": "Question",
+      "bug": "Bug",
+      "data_correction": "Data Correction",
+      "account": "Account",
+      "feedback": "Feedback"
+    },
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "closed": "Closed"
+    }
   },
   "settings": {
     "title": "Profile & Privacy",
-    "subtitle": "Manage your health profile, appearance, and privacy settings.",
+    "subtitle": "You control every record. Export it or delete it permanently at any time.",
     "profileInfo": "Personal Information",
     "displayName": "Display Name",
     "preferredLanguage": "Preferred Language",
@@ -364,11 +501,88 @@
     "privacyDesc": "Your health data is stored securely. Local folders and files remain strictly on your device."
   },
   "guide": {
-    "title": "Help & Guided Tour",
-    "subtitle": "Learn how to use HealthGuardian AI to monitor and protect your health.",
+    "title": "Help & Guide",
+    "subtitle": "Learn how HealthGuardian AI works, how to log data, how adaptive health analysis functions, and how to use the AI assistant.",
     "startTour": "Start Guided Tour",
     "modules": "Application Modules",
-    "safety": "Safety & Clinical Guardrails"
+    "safety": "Safety & Clinical Guardrails",
+    "section": "Section",
+    "beginner": "Beginner",
+    "learnMore": "Learn More",
+    "technicalDetails": "Technical Details",
+    "keyTakeaways": "Key Takeaways:",
+    "realExample": "Real Example",
+    "result": "Result:",
+    "whatNotDo": "What HealthGuardian Does NOT Do:",
+    "interactiveLearning": "Interactive Learning System",
+    "learningSections": "LEARNING SECTIONS",
+    "topicsAvailable": "Topics Available",
+    "masterJourney": "Master Your Preventive Health Journey",
+    "twoMinuteWalkthrough": "2-Minute Walkthrough",
+    "welcomeBannerDesc": "HealthGuardian AI is designed to teach you how to build healthy consistency. Explore our interactive flow diagrams, learn the difference between blank and zero entries, and understand how your private AI assistant chooses the right tools for your questions.",
+    "searchPlaceholder": "Search topics (e.g. baseline, sleep, OCR, emergency)...",
+    "deepDiveTitle": "Deep-Dive Visual Explanations",
+    "threeLayerTitle": "Three-Layer Risk Architecture",
+    "agenticLoopTitle": "Controlled Agentic AI Loop",
+    "clearFilters": "Clear filters",
+    "noMatchingTitle": "No matching guide sections found",
+    "noMatchingDesc": "Try adjusting your search query or switching categories.",
+    "viewAllTopics": "View All Topics",
+    "emergencyNoticeTitle": "Medical Safety & Emergency Notice",
+    "emergencyNoticeDesc": "HealthGuardian AI is a preventive awareness tool and does not provide emergency medical monitoring or diagnostic decisions. In case of acute symptoms, call local emergency services immediately.",
+    "restartAppTour": "Restart App Tour",
+    "categories": {
+      "all": "All Topics",
+      "overview": "Overview",
+      "getting_started": "Getting Started",
+      "core_features": "Core Features",
+      "adaptive_ai": "Adaptive & AI",
+      "privacy_safety": "Privacy & Safety"
+    },
+    "diagram": {
+      "dataFlow": {
+        "systemArchitecture": "System Data Flow Architecture",
+        "noInventions": "No Missing Data Inventions",
+        "step1Title": "1. User Check-In",
+        "step1Desc": "Sleep, water, exercise, symptoms & vitals",
+        "step2Title": "2. Local Storage",
+        "step2Desc": "Private Firestore & IndexedDB records",
+        "step3Title": "3. Adaptive Engine",
+        "step3Desc": "Calculates median baseline & trends",
+        "step4Title": "4. Grounded AI",
+        "step4Desc": "Explains trends using verified data only"
+      },
+      "risk": {
+        "layer1Badge": "Layer 1: Safety Gate",
+        "layer1Title": "Immediate Emergency Screening",
+        "layer1Desc": "Deterministic local filter for critical symptoms (chest pain, fainting). Immediately suggests urgent emergency care.",
+        "layer2Badge": "Layer 2: Clinical Vitals",
+        "layer2Title": "Standard Medical Thresholds",
+        "layer2Desc": "Evidence-based reference ranges for measured blood pressure and blood glucose to highlight elevated readings.",
+        "layer3Badge": "Layer 3: Wellness Baseline",
+        "layer3Title": "Personal Adaptive Intelligence",
+        "layer3Desc": "Compares recent 3-day habits against your historical median (sleep, hydration, activity). Adapts to your individual normal."
+      },
+      "agent": {
+        "title": "Agentic AI: Controlled & Grounded Decision Flow",
+        "userQuestionLabel": "User Question:",
+        "sampleQuestion": "\"Do I already have a hydration goal?\"",
+        "step1Title": "1. Dynamic Tool Selection",
+        "step1Desc": "The AI selects getGoals() specifically—skipping unnecessary medical or risk tools.",
+        "step2Title": "2. Result Inspection & Verification",
+        "step2Desc": "Agent inspects the returned goal list. If sufficient, it generates the final answer immediately without redundant loops.",
+        "writeProtectionLabel": "Write Protection:",
+        "writeProtectionDesc": "Any action that modifies data (e.g. creating a goal) triggers an explicit user confirmation prompt."
+      }
+    }
+  },
+  "adaptive": {
+    "signals": {
+      "sleepAbove": "Recent sleep is {dev}h above your usual pattern of {baseline}h.",
+      "waterAbove": "Recent water intake is {dev} glasses above your usual pattern of {baseline} glasses.",
+      "activityAbove": "Recent activity is {dev} min/day above your usual pattern of {baseline} min.",
+      "genericDeviation": "Recent {metric} is {dev}{unit} {direction} your usual pattern of {baseline}{unit}."
+    }
   },
   "tour": {
     "badge": "Guided App Tour",
@@ -471,5 +685,46 @@
   "emergency": {
     "warningTitle": "Emergency Warning Triggered",
     "disclaimer": "HealthGuardian is not an emergency response tool. Please call emergency services (112 / 911) or visit the nearest emergency room immediately."
+  },
+  "symptoms": {
+    "fatigue": "Fatigue",
+    "headache": "Headache",
+    "dizziness": "Dizziness",
+    "joint_pain": "Joint pain",
+    "fever": "Fever",
+    "cough": "Cough",
+    "shortness_of_breath": "Shortness of breath",
+    "nausea": "Nausea",
+    "chest_discomfort": "Chest discomfort",
+    "poor_sleep": "Poor sleep",
+    "stress": "Stress",
+    "rash": "Rash"
+  },
+  "wellbeing": {
+    "great": "Great",
+    "good": "Good",
+    "okay": "Okay",
+    "tired": "Tired",
+    "not_great": "Not great",
+    "very_low": "Very low",
+    "low": "Low"
+  },
+  "foodQuality": {
+    "poor": "Poor",
+    "fair": "Fair",
+    "good": "Good",
+    "excellent": "Excellent"
+  },
+  "specialties": {
+    "General Physician": "General Physician",
+    "Cardiology": "Cardiology",
+    "Endocrinology": "Endocrinology",
+    "Rheumatology": "Rheumatology",
+    "Dermatology": "Dermatology",
+    "Pulmonology": "Pulmonology",
+    "Gastroenterology": "Gastroenterology",
+    "Neurology": "Neurology",
+    "Nutrition & Dietetics": "Nutrition & Dietetics",
+    "Mental Health": "Mental Health"
   }
 }

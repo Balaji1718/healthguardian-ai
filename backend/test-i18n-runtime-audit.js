@@ -163,8 +163,15 @@ for (const rk of riskKeys) {
 // 7. Verify source files use useTranslation
 console.log("\n[Source Code Integration Audit]");
 const sourceFilesToCheck = [
+  "frontend/src/routes/index.tsx",
+  "frontend/src/routes/auth.tsx",
+  "frontend/src/routes/app/dashboard.tsx",
+  "frontend/src/routes/app/checkin.tsx",
   "frontend/src/routes/app/risk.tsx",
+  "frontend/src/routes/app/assistant.tsx",
+  "frontend/src/features/agent/ChatComposer.tsx",
   "frontend/src/features/guide/GuidedTourModal.tsx",
+  "frontend/src/features/guide/GuideSectionCard.tsx",
   "frontend/src/components/common/States.tsx",
   "frontend/src/routes/app/history.tsx",
   "frontend/src/routes/app/reports.tsx",
@@ -172,6 +179,7 @@ const sourceFilesToCheck = [
   "frontend/src/routes/app/notifications.tsx",
   "frontend/src/routes/app/specialist.tsx",
   "frontend/src/routes/app/support.tsx",
+  "frontend/src/routes/app/settings.tsx",
   "frontend/src/routes/app/guide.tsx",
 ];
 

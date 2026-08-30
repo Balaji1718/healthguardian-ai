@@ -9,6 +9,7 @@ import { useUid } from "@/features/auth/useAuth";
 import { useGuidance } from "@/features/health/queries";
 import { acknowledgeGuidance, toDate } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { formatSpecialty, formatUrgency } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/specialist")({
@@ -48,7 +49,7 @@ export function SpecialistPage() {
         title={t("specialist.title")}
         description={t("specialist.subtitle")}
         action={
-          <ContextualHelp content="Specialist Guidance is advisory and non-diagnostic. It does not replace clinical evaluation or make medical referrals." />
+          <ContextualHelp content={t("specialist.contextHelp")} />
         }
       />
 
@@ -74,7 +75,7 @@ export function SpecialistPage() {
                   </div>
                   <div>
                     <h2 className="font-semibold text-base text-foreground">
-                      {g.suggestedSpecialty}
+                      {formatSpecialty(g.suggestedSpecialty, t)}
                     </h2>
                     <span className="text-[11px] text-muted-foreground">
                       {t("specialist.advisoryCategory")}
@@ -93,7 +94,7 @@ export function SpecialistPage() {
                           : "border-primary/30 bg-primary/10 text-primary"
                     }`}
                   >
-                    {g.urgency}
+                    {formatUrgency(g.urgency, t)}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {toDate(g.createdAt ?? null)?.toLocaleDateString() ?? ""}

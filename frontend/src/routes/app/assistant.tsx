@@ -60,40 +60,42 @@ interface Bubble {
   timestamp?: Date;
 }
 
-const STARTER_PROMPTS = [
-  {
-    icon: "📊",
-    label: "Weekly Overview",
-    prompt: "How have I been doing this week based on my check-ins?",
-  },
-  {
-    icon: "🌙",
-    label: "Sleep Trends",
-    prompt: "How has my sleep changed compared to my baseline?",
-  },
-  {
-    icon: "📋",
-    label: "Medical Reports",
-    prompt: "Explain my latest medical report in simple terms.",
-  },
-  {
-    icon: "🎯",
-    label: "Active Goals",
-    prompt: "What are my current active health goals and progress?",
-  },
-  {
-    icon: "🌐",
-    label: "Activity Guidelines",
-    prompt: "What are the latest public health guidelines for daily physical activity?",
-    enableWebSearch: true,
-  },
-  {
-    icon: "💧",
-    label: "Hydration Advice",
-    prompt: "What is the recommended daily water intake for adults?",
-    enableWebSearch: true,
-  },
-];
+function getStarterPrompts(t: (key: string) => string) {
+  return [
+    {
+      icon: "📊",
+      label: t("assistant.starterPrompts.weeklyOverview.label"),
+      prompt: t("assistant.starterPrompts.weeklyOverview.prompt"),
+    },
+    {
+      icon: "🌙",
+      label: t("assistant.starterPrompts.sleepTrends.label"),
+      prompt: t("assistant.starterPrompts.sleepTrends.prompt"),
+    },
+    {
+      icon: "📋",
+      label: t("assistant.starterPrompts.medicalReports.label"),
+      prompt: t("assistant.starterPrompts.medicalReports.prompt"),
+    },
+    {
+      icon: "🎯",
+      label: t("assistant.starterPrompts.activeGoals.label"),
+      prompt: t("assistant.starterPrompts.activeGoals.prompt"),
+    },
+    {
+      icon: "🌐",
+      label: t("assistant.starterPrompts.activityGuidelines.label"),
+      prompt: t("assistant.starterPrompts.activityGuidelines.prompt"),
+      enableWebSearch: true,
+    },
+    {
+      icon: "💧",
+      label: t("assistant.starterPrompts.hydrationAdvice.label"),
+      prompt: t("assistant.starterPrompts.hydrationAdvice.prompt"),
+      enableWebSearch: true,
+    },
+  ];
+}
 
 function Assistant() {
   const uid = useUid();
@@ -125,7 +127,9 @@ function Assistant() {
 
     // Dynamic loading phase indicator
     setLoadingPhase(
-      isSearchActive ? "Searching verified medical guidelines…" : "Analyzing your health records…",
+      isSearchActive
+        ? (t("assistant.searchingWeb") || "Searching verified medical guidelines…")
+        : (t("assistant.analyzingRecords") || "Analyzing your health records…"),
     );
 
     try {
@@ -168,14 +172,18 @@ function Assistant() {
 
       if (!outcome.aiAvailable) {
         toast.warning(
-          "The AI provider was temporarily unavailable, so I answered using your stored records and deterministic rules.",
+          t("assistant.fallbackWarning") ||
+            "The AI provider was temporarily unavailable, so I answered using your stored records and deterministic rules.",
         );
       }
     } catch {
-      toast.error("The assistant could not complete that request right now. Please try again.");
+      toast.error(
+        t("assistant.generalError") ||
+          "The assistant could not complete that request right now. Please try again.",
+      );
     } finally {
       setBusy(false);
-      setLoadingPhase("Thinking…");
+      setLoadingPhase(t("assistant.thinking") || "Thinking…");
     }
   };
 
@@ -227,11 +235,11 @@ function Assistant() {
                 variant="outline"
                 className="gap-1 text-[10px] font-semibold text-primary border-primary/30 bg-primary/5"
               >
-                <Sparkles className="size-2.5" /> Controlled Agentic
+                <Sparkles className="size-2.5" /> {t("assistant.controlledAgentic")}
               </Badge>
-              <ContextualHelp content="Answers are based strictly on permitted records from your account and evidence-based public guidelines. The assistant never diagnoses or prescribes." />
+              <ContextualHelp content={t("assistant.groundedContextHelp")} />
             </div>
-            <p className="text-xs text-muted-foreground">Your health information assistant</p>
+            <p className="text-xs text-muted-foreground">{t("assistant.subtitle")}</p>
           </div>
 
           {messages.length > 0 && (
@@ -241,7 +249,7 @@ function Assistant() {
               onClick={handleClearChat}
               className="text-xs text-muted-foreground hover:text-foreground h-8 gap-1"
             >
-              <RefreshCw className="size-3" /> New chat
+              <RefreshCw className="size-3" /> {t("assistant.newChat") || "New chat"}
             </Button>
           )}
         </div>
@@ -258,17 +266,16 @@ function Assistant() {
                   <Bot className="size-6" />
                 </div>
                 <h2 className="text-lg font-semibold text-foreground">
-                  How can I help with your health data today?
+                  {t("assistant.welcomeHeading")}
                 </h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Ask about your sleep, hydration, exercise patterns, lab reports, or look up
-                  verified public health recommendations.
+                  {t("assistant.welcomeSubtext")}
                 </p>
               </div>
 
               {/* Starter Chips Grid */}
               <div className="grid gap-2.5 sm:grid-cols-2 pt-2">
-                {STARTER_PROMPTS.map((item, idx) => (
+                {getStarterPrompts(t).map((item, idx) => (
                   <button
                     key={idx}
                     type="button"

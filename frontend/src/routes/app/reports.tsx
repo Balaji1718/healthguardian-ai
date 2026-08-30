@@ -30,6 +30,7 @@ import {
 } from "@/services/firebase/repositories";
 import type { MedicalReport } from "@/models";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { formatReportType } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/reports")({
@@ -126,13 +127,13 @@ export function ReportsPage() {
       await qc.invalidateQueries({ queryKey: ["reports"] });
       toast[found.length ? "success" : "warning"](
         found.length
-          ? `${found.length} value(s) read. Please check each one before saving.`
-          : "The text could not be read reliably. You can still keep the document and enter values manually.",
+          ? (t("reports.valuesReadPrompt", { count: found.length }) || `${found.length} value(s) read. Please check each one before saving.`)
+          : (t("reports.textNotReadWarning") || "The text could not be read reliably. You can still keep the document and enter values manually.")
       );
     } catch (err) {
       if (uid && reportId) await updateReport(uid, reportId, { ocrStatus: "failed" });
       if (uid && localFileId) await deleteLocalDocument(uid, localFileId);
-      toast.error((err as Error).message || "Reading the document failed on this device.");
+      toast.error((err as Error).message || t("reports.readingFailed") || "Reading the document failed on this device.");
     } finally {
       setBusy(false);
       setProgress(null);
@@ -207,7 +208,7 @@ export function ReportsPage() {
               id="reportTitle"
               value={meta.reportTitle}
               onChange={(e) => setMeta({ ...meta, reportTitle: e.target.value })}
-              placeholder="Annual blood panel"
+              placeholder={t("reports.reportNamePlaceholder") || "Annual blood panel"}
             />
             {errors["reportTitle"] && (
               <p className="text-xs text-destructive">{errors["reportTitle"]}</p>
@@ -223,7 +224,7 @@ export function ReportsPage() {
             >
               {REPORT_TYPES.map((typeKey) => (
                 <option key={typeKey} value={typeKey}>
-                  {typeKey.replace(/_/g, " ")}
+                  {formatReportType(typeKey, t)}
                 </option>
               ))}
             </select>
@@ -253,7 +254,7 @@ export function ReportsPage() {
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <Label htmlFor="file">{t("reports.uploadBoxHint")}</Label>
-            <ContextualHelp content="Raw medical documents are processed on your device and stored in local browser IndexedDB. Review OCR results before confirming." />
+            <ContextualHelp content={t("reports.contextHelp")} />
           </div>
           <Input
             id="file"
@@ -362,7 +363,7 @@ export function ReportsPage() {
                   <p className="truncate font-medium">{r.reportTitle}</p>
                   <p className="text-xs text-muted-foreground">
                     {toDate(r.reportDate)?.toLocaleDateString() ?? "—"} ·{" "}
-                    {r.reportType.replace(/_/g, " ")}
+                    {formatReportType(r.reportType, t)}
                   </p>
                 </div>
                 <Badge variant={r.verificationStatus === "verified" ? "default" : "secondary"}>

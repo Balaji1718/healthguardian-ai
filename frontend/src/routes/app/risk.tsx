@@ -25,8 +25,9 @@ import {
 } from "@/features/healthRisk/engine";
 import { buildHealthContext } from "@/core/adaptive/context";
 import { createGuidance, saveAssessment, toDate } from "@/services/firebase/repositories";
-import { ALGORITHM_VERSION, FACTOR_LABELS, ENABLE_ADAPTIVE_V2 } from "@/core/constants/health";
+import { ENABLE_ADAPTIVE_V2 } from "@/core/constants/health";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
+import { formatFactorTitle, formatPatternDetail } from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/risk")({
@@ -277,7 +278,7 @@ export function RiskPage() {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold">
-                    {t(`risk.factors.${p.factor}`) || FACTOR_LABELS[p.factor] || p.factor}
+                    {formatFactorTitle(p.factor, t)}
                   </h3>
                   <Badge
                     variant="secondary"
@@ -286,7 +287,7 @@ export function RiskPage() {
                     {p.severity === 2 ? t("risk.safetyCritical") : t("risk.worthWatching")}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{p.message || p.detail}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{formatPatternDetail(p, t)}</p>
               </div>
             </article>
           ))}

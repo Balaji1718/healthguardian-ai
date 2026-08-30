@@ -14,6 +14,11 @@ import { useUid } from "@/features/auth/useAuth";
 import { useSupportRequests } from "@/features/health/queries";
 import { supportSchema } from "@/core/validation/schemas";
 import { createSupportRequest, toDate } from "@/services/firebase/repositories";
+import {
+  formatSupportPriority,
+  formatSupportStatus,
+  formatSupportType,
+} from "@/locales/formatters";
 import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/support")({
@@ -94,9 +99,9 @@ export function SupportPage() {
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value })}
           >
-            {["question", "bug", "data_correction", "account", "feedback"].map((t) => (
-              <option key={t} value={t}>
-                {t.replace(/_/g, " ")}
+            {["question", "bug", "data_correction", "account", "feedback"].map((typeKey) => (
+              <option key={typeKey} value={typeKey}>
+                {formatSupportType(typeKey, t)}
               </option>
             ))}
           </select>
@@ -111,9 +116,9 @@ export function SupportPage() {
               setForm({ ...form, priority: e.target.value as "low" | "normal" | "high" })
             }
           >
-            {["low", "normal", "high"].map((p) => (
-              <option key={p} value={p}>
-                {p}
+            {["low", "normal", "high"].map((prioKey) => (
+              <option key={prioKey} value={prioKey}>
+                {formatSupportPriority(prioKey, t)}
               </option>
             ))}
           </select>
@@ -159,7 +164,7 @@ export function SupportPage() {
             <article key={r.id} className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
               <span className="min-w-0 flex-1 truncate font-medium">{r.reason}</span>
               <Badge variant="secondary" className="capitalize">
-                {r.status.replace(/_/g, " ")}
+                {formatSupportStatus(r.status, t)}
               </Badge>
               <span className="text-xs text-muted-foreground">
                 {toDate(r.createdAt ?? null)?.toLocaleDateString() ?? ""}

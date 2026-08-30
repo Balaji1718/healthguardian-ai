@@ -24,6 +24,7 @@ import { deleteAllLocalDocuments } from "@/services/localStorage/documents";
 import { deleteAccount, logout } from "@/services/firebase/auth";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LanguageSelector } from "@/features/i18n/LanguageSelector";
+import { useTranslation } from "@/locales/i18n";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -47,6 +48,7 @@ function SettingsPage() {
   const uid = useUid();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const profile = useProfile(uid);
   const health = useHealthProfile(uid);
   const [p, setP] = useState({
@@ -97,7 +99,7 @@ function SettingsPage() {
     const parsedP = profileSchema.safeParse(p);
     const parsedH = healthProfileSchema.safeParse(h);
     if (!parsedP.success || !parsedH.success) {
-      toast.error("Please check the highlighted values.");
+      toast.error(t("common.error"));
       return;
     }
     setBusy(true);
@@ -121,9 +123,9 @@ function SettingsPage() {
       });
       await qc.invalidateQueries({ queryKey: ["profile"] });
       await qc.invalidateQueries({ queryKey: ["healthProfile"] });
-      toast.success("Profile updated.");
+      toast.success(t("common.success"));
     } catch {
-      toast.error("Could not save your profile.");
+      toast.error(t("common.error"));
     } finally {
       setBusy(false);
     }
@@ -139,14 +141,19 @@ function SettingsPage() {
     const blob = new Blob(
       [
         JSON.stringify(
-          { profile: profile.data, health: health.data, checkins, reports, goals },
+          {
+            exportedAt: new Date().toISOString(),
+            profile: profile.data,
+            healthProfile: health.data,
+            checkins,
+            reports: reports.map((r) => ({ ...r, fileRef: undefined })),
+            goals,
+          },
           null,
           2,
         ),
       ],
-      {
-        type: "application/json",
-      },
+      { type: "application/json" },
     );
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -158,59 +165,81 @@ function SettingsPage() {
 
   const wipe = async () => {
     if (!uid) return;
-    if (!window.confirm("Permanently delete all your health data? This cannot be undone.")) return;
-    await deleteAllHealthData(uid);
-    await deleteAllLocalDocuments(uid);
-    await qc.invalidateQueries();
-    toast.success("All your health data has been deleted.");
+    if (
+      !window.confirm(
+        t("settings.confirmDeleteRecords") ||
+          "Permanently delete all check-ins, medical reports, goals, and guidance?",
+      )
+    )
+      return;
+    try {
+      await deleteAllHealthData(uid);
+      await deleteAllLocalDocuments(uid);
+      await qc.invalidateQueries();
+      toast.success(t("common.success"));
+    } catch {
+      toast.error(t("common.error"));
+    }
   };
 
   const removeAccount = async () => {
-    if (!uid || !password) {
-      toast.error("Enter your password to confirm account deletion.");
+    if (!password) {
+      toast.error(
+        t("settings.enterPasswordToDelete") ||
+          "Enter your password to confirm account deletion.",
+      );
       return;
     }
-    if (!window.confirm("Delete your account and every record permanently?")) return;
+    if (
+      !window.confirm(
+        t("settings.confirmDeleteAccount") ||
+          "Delete your account and every record permanently?",
+      )
+    )
+      return;
     try {
       await deleteAllHealthData(uid);
       await deleteAllLocalDocuments(uid);
       await deleteAccount(password);
       await navigate({ to: "/", replace: true });
     } catch {
-      toast.error("Could not delete the account. Check your password and try again.");
+      toast.error(
+        t("settings.deleteAccountError") ||
+          "Could not delete the account. Check your password and try again.",
+      );
     }
   };
 
   return (
     <div>
       <PageHeader
-        title="Profile & privacy"
-        description="You control every record. Export it or delete it permanently at any time."
+        title={t("settings.title")}
+        description={t("settings.subtitle")}
       />
 
       <section className="surface grid gap-4 p-6 sm:grid-cols-2">
-        <h2 className="font-medium sm:col-span-2">About you</h2>
+        <h2 className="font-medium sm:col-span-2">{t("common.aboutYou")}</h2>
         <Text
           id="firstName"
-          label="First name"
+          label={t("common.firstName")}
           value={p.firstName}
           onChange={(v) => setP({ ...p, firstName: v })}
         />
         <Text
           id="lastName"
-          label="Last name"
+          label={t("common.lastName")}
           value={p.lastName}
           onChange={(v) => setP({ ...p, lastName: v })}
         />
         <Text
           id="gender"
-          label="Gender"
+          label={t("common.gender")}
           value={p.gender}
           onChange={(v) => setP({ ...p, gender: v })}
         />
         <Text
           id="heightCm"
-          label="Height (cm)"
+          label={t("common.heightCm")}
           value={p.heightCm}
           onChange={(v) => setP({ ...p, heightCm: v })}
           type="number"
@@ -218,43 +247,42 @@ function SettingsPage() {
       </section>
 
       <section className="surface mt-4 grid gap-4 p-6 sm:grid-cols-2">
-        <h2 className="font-medium sm:col-span-2">Health background</h2>
+        <h2 className="font-medium sm:col-span-2">{t("common.healthBackground")}</h2>
         <p className="text-sm text-muted-foreground sm:col-span-2">
-          Used for context only. HealthGuardian never changes, suggests or interprets your
-          medication.
+          {t("common.healthBackgroundDisclaimer")}
         </p>
         <Text
           id="knownConditions"
-          label="Known conditions (comma separated)"
+          label={t("common.knownConditions")}
           value={h.knownConditions}
           onChange={(v) => setH({ ...h, knownConditions: v })}
         />
         <Text
           id="allergies"
-          label="Allergies"
+          label={t("common.allergies")}
           value={h.allergies}
           onChange={(v) => setH({ ...h, allergies: v })}
         />
         <Text
           id="familyHistory"
-          label="Family history"
+          label={t("common.familyHistory")}
           value={h.familyHistory}
           onChange={(v) => setH({ ...h, familyHistory: v })}
         />
         <Text
           id="currentMedications"
-          label="Current medications"
+          label={t("common.currentMedications")}
           value={h.currentMedications}
           onChange={(v) => setH({ ...h, currentMedications: v })}
         />
         <Text
           id="bloodGroup"
-          label="Blood group"
+          label={t("common.bloodGroup")}
           value={h.bloodGroup}
           onChange={(v) => setH({ ...h, bloodGroup: v })}
         />
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="emergencyNotes">Emergency notes</Label>
+          <Label htmlFor="emergencyNotes">{t("common.emergencyNotes")}</Label>
           <Textarea
             id="emergencyNotes"
             rows={3}
@@ -264,7 +292,7 @@ function SettingsPage() {
         </div>
         <div className="sm:col-span-2">
           <Button onClick={() => void save()} disabled={busy}>
-            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} Save profile
+            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("common.saveChanges")}
           </Button>
         </div>
       </section>
@@ -274,10 +302,9 @@ function SettingsPage() {
       </section>
 
       <section className="surface mt-4 space-y-3 p-6">
-        <h2 className="font-medium">Appearance & Theme</h2>
+        <h2 className="font-medium">{t("common.appearanceTheme")}</h2>
         <p className="text-sm text-muted-foreground">
-          Choose your interface preference: Light, Dark, or automatically match your System color
-          scheme.
+          {t("common.appearanceThemeDesc")}
         </p>
         <div className="pt-1">
           <ThemeToggle variant="buttons" />
@@ -285,13 +312,13 @@ function SettingsPage() {
       </section>
 
       <section className="surface mt-4 space-y-3 p-6">
-        <h2 className="font-medium">Your data</h2>
+        <h2 className="font-medium">{t("common.yourData")}</h2>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => void exportData()}>
-            <Download className="mr-2 size-4" /> Export everything (JSON)
+            <Download className="mr-2 size-4" /> {t("common.exportEverything")}
           </Button>
           <Button variant="outline" onClick={() => void wipe()}>
-            <Trash2 className="mr-2 size-4" /> Delete all health data
+            <Trash2 className="mr-2 size-4" /> {t("common.deleteAllHealthData")}
           </Button>
           <Button
             variant="ghost"
@@ -302,20 +329,19 @@ function SettingsPage() {
               await navigate({ to: "/auth", replace: true });
             }}
           >
-            <LogOut className="mr-2 size-4" /> Sign out
+            <LogOut className="mr-2 size-4" /> {t("common.signOut")}
           </Button>
         </div>
       </section>
 
       <section className="surface mt-4 space-y-3 border-destructive/40 p-6">
-        <h2 className="font-medium text-destructive">Delete your account</h2>
+        <h2 className="font-medium text-destructive">{t("common.deleteYourAccount")}</h2>
         <p className="text-sm text-muted-foreground">
-          This removes your account, all Firestore records and every document stored in this
-          browser. It cannot be undone.
+          {t("common.deleteAccountNotice")}
         </p>
         <div className="flex flex-wrap items-end gap-2">
           <div className="space-y-1.5">
-            <Label htmlFor="confirmPassword">Confirm with your password</Label>
+            <Label htmlFor="confirmPassword">{t("common.confirmWithPassword")}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -324,7 +350,7 @@ function SettingsPage() {
             />
           </div>
           <Button variant="destructive" onClick={() => void removeAccount()}>
-            Delete account
+            {t("common.deleteAccount")}
           </Button>
         </div>
       </section>

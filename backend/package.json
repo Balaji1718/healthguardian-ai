@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch . --watch ../frontend/vite.config.ts --ext js,mjs,cjs,json,ts,tsx,env --exec \"node server.js\"",
+    "dev": "node --watch-path=server.js --watch-path=ai-provider-router.js --watch-path=conversational-checkin.js --watch-path=web-search.js server.js",
     "start": "cross-env NODE_ENV=production node server.js",
     "test:ai-providers": "node test-ai-providers.js",
     "test:ai-router": "node test-ai-router-mocks.js"

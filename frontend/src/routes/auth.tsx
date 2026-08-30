@@ -262,15 +262,13 @@ function AuthPage() {
                   {authMode === "register" ? t("auth.createAccount") : t("auth.welcome")}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {authMode === "register"
-                    ? "Your health data is private to your authenticated account."
-                    : t("auth.subtitle")}
+                  {t("auth.subtitle")}
                 </p>
 
                 <form className="mt-5 space-y-4" onSubmit={submitAuth} noValidate>
                   {authMode === "register" && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="displayName">Full name</Label>
+                      <Label htmlFor="displayName">{t("auth.fullName")}</Label>
                       <Input
                         id="displayName"
                         value={form.displayName}
@@ -358,7 +356,7 @@ function AuthPage() {
         )}
 
         <p className="mt-6 text-xs leading-relaxed text-muted-foreground text-center">
-          {MEDICAL_DISCLAIMER}
+          {t("common.medicalDisclaimer")}
         </p>
       </div>
     </div>
