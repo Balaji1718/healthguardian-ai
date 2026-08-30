@@ -33,11 +33,30 @@ export async function requestNotificationPermission(): Promise<
   }
 }
 
-/** Sensitive clinical detail is never placed in notification text. */
-export function showBrowserNotification(title: string, body: string) {
+export async function showBrowserNotification(title: string, body: string): Promise<boolean> {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return false;
+
+  // 1. Try Service Worker showNotification (works on mobile Chrome, Android PWA, modern mobile browsers)
+  if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && typeof reg.showNotification === "function") {
+        await reg.showNotification(title, {
+          body,
+          icon: "/icons/icon-192.png",
+          badge: "/icons/icon-192.png",
+          tag: "healthguardian-alert",
+        });
+        return true;
+      }
+    } catch {
+      // Fall through to Desktop Notification constructor
+    }
+  }
+
+  // 2. Desktop Notification API fallback
   try {
-    new Notification(title, { body, icon: "/icons/icon-192.png", tag: "healthguardian" });
+    new Notification(title, { body, icon: "/icons/icon-192.png", tag: "healthguardian-alert" });
     return true;
   } catch {
     return false;
@@ -48,12 +67,42 @@ export async function pushNotification(
   uid: string,
   n: Omit<AppNotification, "status"> & { status?: AppNotification["status"] },
 ) {
-  const delivered = showBrowserNotification(n.title, n.message);
+  const delivered = await showBrowserNotification(n.title, n.message);
   return createNotification(uid, {
     ...n,
     status: delivered ? "delivered" : (n.status ?? "pending"),
     ...(delivered ? { deliveredAt: new Date() } : {}),
   } as AppNotification);
+}
+
+export async function sendTestNotification(uid: string, lang = "en"): Promise<boolean> {
+  const titles: Record<string, string> = {
+    en: "HealthGuardian AI Notification Test",
+    ta: "HealthGuardian AI அறிவிப்பு சோதனை",
+    hi: "HealthGuardian AI अधिसूचना परीक्षण",
+  };
+  const bodies: Record<string, string> = {
+    en: "Notifications are working properly on this device. You will receive health reminders and trend insights here.",
+    ta: "இந்தச் சாதனத்தில் அறிவிப்புகள் சரியாகச் செயல்படுகின்றன. உங்கள் சுகாதார நினைவூட்டல்கள் இங்கே தோன்றும்.",
+    hi: "इस डिवाइस पर सूचनाएं ठीक से काम कर रही हैं। आपको स्वास्थ्य अनुस्मारक यहां प्राप्त होंगे।",
+  };
+
+  const title = titles[lang] || titles.en;
+  const message = bodies[lang] || bodies.en;
+
+  const delivered = await showBrowserNotification(title, message);
+  if (uid) {
+    await createNotification(uid, {
+      type: "reminder",
+      category: "lifestyle",
+      title,
+      message,
+      priority: "low",
+      status: delivered ? "delivered" : "pending",
+      ...(delivered ? { deliveredAt: new Date() } : {}),
+    } as AppNotification);
+  }
+  return delivered;
 }
 
 const DEDUPE_KEY = "hg_pattern_alerts";

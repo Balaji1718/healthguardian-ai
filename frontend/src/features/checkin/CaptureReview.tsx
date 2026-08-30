@@ -25,6 +25,7 @@ export interface CaptureReviewProps {
   ambiguityReasons?: string[];
   sourceDocument?: string;
   sourcePage?: number;
+  inputUtterance?: string;
   onEdit: () => void;
   onConfirm: (includedData?: Partial<DailyCheckin>) => Promise<void>;
   busy: boolean;
@@ -47,6 +48,7 @@ export function CaptureReview({
   ambiguityReasons = [],
   sourceDocument,
   sourcePage,
+  inputUtterance,
   onEdit,
   onConfirm,
   busy,
@@ -233,6 +235,19 @@ export function CaptureReview({
         </div>
       </div>
 
+      {/* Raw Spoken/Typed Input vs Extracted Understanding */}
+      {inputUtterance && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-xs space-y-1.5">
+          <div className="flex items-center gap-1.5 font-medium text-primary text-[11px]">
+            <Sparkles className="size-3.5" />
+            <span>{t("review.spokenInputLabel") || "What you spoke / typed:"}</span>
+          </div>
+          <p className="text-foreground text-xs leading-relaxed italic pl-5">
+            "{inputUtterance}"
+          </p>
+        </div>
+      )}
+
       {/* Ambiguity Notices (if any) */}
       {isAmbiguous && ambiguityReasons.length > 0 && (
         <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-700 dark:text-amber-300">
@@ -370,8 +385,8 @@ export function CaptureReview({
               className="text-[11px] text-primary hover:underline"
             >
               {includedFields.notes
-                ? (t("review.exclude") || "Exclude")
-                : (t("review.include") || "Include")}
+                ? (t("review.excludeField") || "Exclude")
+                : (t("review.includeField") || "Include")}
             </button>
           </div>
           {includedFields.notes && (

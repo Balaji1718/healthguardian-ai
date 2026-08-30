@@ -222,7 +222,8 @@
     "editValues": "Edit values",
     "confirmAndSave": "Confirm & Save",
     "excludeField": "Exclude this field",
-    "includeField": "Include this field"
+    "includeField": "Include this field",
+    "spokenInputLabel": "What you spoke / typed:"
   },
   "folder": {
     "title": "Connected Health Folder",
@@ -425,6 +426,10 @@
     "title": "Notifications",
     "subtitle": "Alerts are raised only from patterns in your own entries, and never contain sensitive clinical detail.",
     "enableAlerts": "Enable browser alerts",
+    "testAlerts": "Send test notification",
+    "testDelivered": "Test notification sent! Check your notification tray / screen.",
+    "testLogged": "Test notification added to your in-app notification center.",
+    "permissionRequired": "Please grant notification permission to test device alerts.",
     "markRead": "Mark read",
     "dismiss": "Dismiss",
     "emptyTitle": "Nothing to show",
@@ -498,7 +503,13 @@
     "preferredLanguage": "Preferred Language",
     "appearance": "Appearance & Theme",
     "privacyNotice": "Privacy & Data Storage",
-    "privacyDesc": "Your health data is stored securely. Local folders and files remain strictly on your device."
+    "privacyDesc": "Your health data is stored securely. Local folders and files remain strictly on your device.",
+    "securityTitle": "Account Security & Password Recovery",
+    "securityDesc": "Send a verified password reset email to your registered account address.",
+    "registeredEmail": "Registered Account Email",
+    "sendPasswordReset": "Send password recovery email",
+    "passwordResetSent": "Password reset instructions have been sent to your registered email.",
+    "passwordResetButton": "Send Recovery Link"
   },
   "guide": {
     "title": "Help & Guide",

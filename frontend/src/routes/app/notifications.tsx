@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bell, BellRing } from "lucide-react";
+import { Bell, BellRing, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/AppShell";
 import { Disclaimer, EmptyState, ErrorState, LoadingState } from "@/components/common/States";
@@ -13,6 +14,7 @@ import {
   markRead,
   notificationPermission,
   requestNotificationPermission,
+  sendTestNotification,
 } from "@/services/notifications/notifications";
 import { toDate } from "@/services/firebase/repositories";
 import { ContextualHelp } from "@/features/guide/ContextualHelp";
@@ -44,8 +46,9 @@ export const Route = createFileRoute("/app/notifications")({
 export function NotificationsPage() {
   const uid = useUid();
   const qc = useQueryClient();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data, isLoading, isError, refetch } = useNotificationsQuery(uid);
+  const [testing, setTesting] = useState(false);
 
   if (isLoading) return <LoadingState label={t("common.loading")} />;
   if (isError) return <ErrorState onRetry={() => void refetch()} />;
@@ -57,6 +60,30 @@ export function NotificationsPage() {
     else toast.warning(t("common.offlineNotice"));
   };
 
+  const handleTestNotification = async () => {
+    if (!uid) return;
+    setTesting(true);
+    try {
+      if (permission !== "granted") {
+        const perm = await requestNotificationPermission();
+        if (perm !== "granted") {
+          toast.error(t("notifications.permissionRequired"));
+        }
+      }
+      const delivered = await sendTestNotification(uid, language);
+      await qc.invalidateQueries({ queryKey: ["notifications"] });
+      if (delivered) {
+        toast.success(t("notifications.testDelivered"));
+      } else {
+        toast.info(t("notifications.testLogged"));
+      }
+    } catch {
+      toast.error(t("common.error"));
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const items = (data ?? []).filter((n) => n.status !== "dismissed");
   const permission = notificationPermission();
 
@@ -66,13 +93,26 @@ export function NotificationsPage() {
         title={t("notifications.title")}
         description={t("notifications.subtitle")}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <ContextualHelp content="Alerts are for awareness, not emergency monitoring. Notifications never expose private clinical details." />
             {permission !== "granted" && (
-              <Button variant="outline" onClick={() => void enable()}>
+              <Button variant="outline" size="sm" onClick={() => void enable()}>
                 <BellRing className="mr-2 size-4" /> {t("notifications.enableAlerts")}
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={testing}
+              onClick={() => void handleTestNotification()}
+            >
+              {testing ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 size-4 text-primary" />
+              )}
+              {t("notifications.testAlerts")}
+            </Button>
           </div>
         }
       />

@@ -110,6 +110,7 @@ function Checkin() {
     Record<string, "high" | "medium" | "low">
   >({});
   const [ambiguityReasonsList, setAmbiguityReasonsList] = useState<string[]>([]);
+  const [rawInputUtterance, setRawInputUtterance] = useState<string>("");
 
   // Pre-fill when an entry already exists for the chosen date
   useEffect(() => {
@@ -255,6 +256,7 @@ function Checkin() {
     }
 
     setExtracting(true);
+    setRawInputUtterance(cleanText);
     setEmergencyWarning(null);
     setAmbiguityWarning(null);
     setAmbiguityReasonsList([]);
@@ -363,7 +365,7 @@ function Checkin() {
     }
   };
 
-  // Confirm and save checkin to Firestore
+  // Confirm and save checkin to Firestore with full cross-screen reactive invalidation
   const handleConfirmSave = async (includedData?: Partial<DailyCheckin>) => {
     if (!uid || busy) return;
     const fallbackData = validateAndGetParsedData();
@@ -377,7 +379,15 @@ function Checkin() {
         source: activeSource,
         verificationStatus: "user_verified",
       });
-      await qc.invalidateQueries({ queryKey: ["checkins"] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["checkins"] }),
+        qc.invalidateQueries({ queryKey: ["dashboard"] }),
+        qc.invalidateQueries({ queryKey: ["risk"] }),
+        qc.invalidateQueries({ queryKey: ["baselines"] }),
+        qc.invalidateQueries({ queryKey: ["goals"] }),
+        qc.invalidateQueries({ queryKey: ["notifications"] }),
+        qc.invalidateQueries({ queryKey: ["guidance"] }),
+      ]);
       toast.success(
         online
           ? "Today's check-in was saved."
@@ -527,6 +537,7 @@ function Checkin() {
           }
           sourceDocument={sourceDoc?.name}
           sourcePage={sourceDoc?.page}
+          inputUtterance={rawInputUtterance}
           onEdit={() => setMode("detailed")}
           onConfirm={handleConfirmSave}
           busy={busy}

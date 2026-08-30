@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Download, Loader2, LogOut, Trash2 } from "lucide-react";
+import { Download, KeyRound, Loader2, LogOut, Mail, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/AppShell";
 import { Disclaimer } from "@/components/common/States";
@@ -21,7 +21,7 @@ import {
   saveProfile,
 } from "@/services/firebase/repositories";
 import { deleteAllLocalDocuments } from "@/services/localStorage/documents";
-import { deleteAccount, logout } from "@/services/firebase/auth";
+import { deleteAccount, getFirebaseAuth, logout, resetPassword } from "@/services/firebase/auth";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LanguageSelector } from "@/features/i18n/LanguageSelector";
 import { useTranslation } from "@/locales/i18n";
@@ -69,6 +69,28 @@ function SettingsPage() {
   });
   const [busy, setBusy] = useState(false);
   const [password, setPassword] = useState("");
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const currentUserEmail = getFirebaseAuth().currentUser?.email ?? "";
+
+  const handleSendPasswordReset = async () => {
+    if (!currentUserEmail) {
+      toast.error(t("auth.invalidEmail") || "No email found for this account.");
+      return;
+    }
+    setSendingReset(true);
+    try {
+      await resetPassword(currentUserEmail);
+      toast.success(
+        t("settings.passwordResetSent") ||
+          `Password reset instructions have been sent to ${currentUserEmail}`,
+      );
+    } catch {
+      toast.error(t("common.error") || "Could not send password recovery email.");
+    } finally {
+      setSendingReset(false);
+    }
+  };
 
   useEffect(() => {
     if (profile.data) {
@@ -308,6 +330,47 @@ function SettingsPage() {
         </p>
         <div className="pt-1">
           <ThemeToggle variant="buttons" />
+        </div>
+      </section>
+
+      {/* Account Security & Password Recovery */}
+      <section className="surface mt-4 space-y-3 p-6">
+        <div className="flex items-center gap-2">
+          <KeyRound className="size-4 text-primary" />
+          <h2 className="font-medium text-foreground">{t("settings.securityTitle")}</h2>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          {t("settings.securityDesc")}
+        </p>
+
+        <div className="rounded-xl border bg-muted/40 p-4 space-y-3 max-w-lg">
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-muted-foreground">
+              {t("settings.registeredEmail")}
+            </Label>
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Mail className="size-4 text-primary" />
+              <span>{currentUserEmail || t("common.unknown")}</span>
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1.5"
+              disabled={sendingReset || !currentUserEmail}
+              onClick={() => void handleSendPasswordReset()}
+            >
+              {sendingReset ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <KeyRound className="size-3.5" />
+              )}
+              {t("settings.passwordResetButton")}
+            </Button>
+          </div>
         </div>
       </section>
 

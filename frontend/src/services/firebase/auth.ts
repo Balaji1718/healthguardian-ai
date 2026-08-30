@@ -13,6 +13,8 @@ import {
 import { getFirebaseAuth } from "./config";
 import { ensureUserRoot } from "./repositories";
 
+export { getFirebaseAuth };
+
 export async function register(email: string, password: string, displayName: string) {
   const auth = getFirebaseAuth();
   const cred = await createUserWithEmailAndPassword(auth, email, password);
