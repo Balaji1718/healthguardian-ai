@@ -210,9 +210,7 @@ export function GoalsPage() {
                   {t(`goals.status.${g.status}`) || g.status}
                 </Badge>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {formatGoalProgress(g, t)}
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{formatGoalProgress(g, t)}</p>
               {g.targetValue != null && (
                 <Progress
                   className="mt-3"

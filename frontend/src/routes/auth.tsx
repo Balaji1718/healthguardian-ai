@@ -261,9 +261,7 @@ function AuthPage() {
                 <h1 className="text-xl font-semibold text-foreground">
                   {authMode === "register" ? t("auth.createAccount") : t("auth.welcome")}
                 </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t("auth.subtitle")}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{t("auth.subtitle")}</p>
 
                 <form className="mt-5 space-y-4" onSubmit={submitAuth} noValidate>
                   {authMode === "register" && (

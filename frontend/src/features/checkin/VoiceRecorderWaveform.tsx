@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   SUPPORTED_SPEECH_LANGUAGES,
+  normalizeSpeechTranscript,
   useSpeechRecognition,
 } from "@/features/checkin/useSpeechRecognition";
 
@@ -35,6 +36,8 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
   const [editableTranscript, setEditableTranscript] = useState("");
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isImprovingTranscript, setIsImprovingTranscript] = useState(false);
+  const [audioPlaybackTime, setAudioPlaybackTime] = useState(0);
 
   const timerRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -81,10 +84,18 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
     }
     audioChunksRef.current = [];
 
-    // Optional audio capture for local preview
+    // Optional audio capture for local preview with echo cancellation
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            // Mobile: speaker-phone mode reduces echo during playback
+            channelCount: { ideal: 1 },
+          },
+        });
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
 
@@ -141,6 +152,14 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
     setRecorderState("stopped");
   };
 
+  const handleImproveTranscript = () => {
+    if (!editableTranscript.trim()) return;
+    const improved = normalizeSpeechTranscript(editableTranscript, speech.language);
+    setEditableTranscript(improved);
+    setIsImprovingTranscript(true);
+    window.setTimeout(() => setIsImprovingTranscript(false), 600);
+  };
+
   // Cancel / Delete
   const handleCancel = () => {
     speech.reset();
@@ -162,14 +181,24 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
     if (!mediaUrl) return;
     if (!audioElementRef.current) {
       audioElementRef.current = new Audio(mediaUrl);
-      audioElementRef.current.onended = () => setIsPlayingAudio(false);
+      audioElementRef.current.ontimeupdate = () => {
+        if (audioElementRef.current) {
+          setAudioPlaybackTime(audioElementRef.current.currentTime);
+        }
+      };
+      audioElementRef.current.onended = () => {
+        setIsPlayingAudio(false);
+        setAudioPlaybackTime(0);
+      };
     }
 
     if (isPlayingAudio) {
       audioElementRef.current.pause();
       setIsPlayingAudio(false);
     } else {
-      audioElementRef.current.play();
+      audioElementRef.current.play().catch((err) => {
+        console.warn("Audio playback error:", err);
+      });
       setIsPlayingAudio(true);
     }
   };
@@ -334,15 +363,20 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
         <div className="space-y-3">
           {/* Audio Preview Bar (if recorded) */}
           {mediaUrl && (
-            <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-muted/30 border text-xs">
+            <div
+              className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-muted/30 border text-xs transition-colors"
+              style={{
+                backgroundColor: isPlayingAudio ? "rgba(var(--primary), 0.15)" : undefined,
+              }}
+            >
               <button
                 type="button"
                 onClick={togglePlayAudio}
-                className="flex items-center gap-2 text-primary font-medium hover:underline"
+                className="flex items-center gap-2 text-primary font-medium hover:underline transition-opacity"
               >
                 {isPlayingAudio ? (
                   <>
-                    <Pause className="size-3.5" /> Pause Audio
+                    <Volume2 className="size-3.5 animate-pulse" /> Playing audio...
                   </>
                 ) : (
                   <>
@@ -350,9 +384,27 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
                   </>
                 )}
               </button>
-              <span className="text-muted-foreground font-mono text-[11px]">
-                {formatTime(elapsedSeconds)}
-              </span>
+              <div className="flex items-center gap-2">
+                {isPlayingAudio && (
+                  <div className="flex gap-0.5">
+                    {[0, 1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className="w-1 h-2 rounded-full bg-primary/60"
+                        style={{
+                          animation: `pulse 0.6s ease-in-out infinite`,
+                          animationDelay: `${i * 0.15}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+                <span className="text-muted-foreground font-mono text-[11px] w-10 text-right">
+                  {isPlayingAudio
+                    ? formatTime(Math.round(audioPlaybackTime))
+                    : formatTime(elapsedSeconds)}
+                </span>
+              </div>
             </div>
           )}
 
@@ -393,6 +445,17 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
                 type="button"
                 variant="outline"
                 size="sm"
+                onClick={handleImproveTranscript}
+                disabled={!editableTranscript.trim() || isImprovingTranscript}
+                className="text-xs h-8 gap-1.5"
+              >
+                <Sparkles className="size-3.5" /> {isImprovingTranscript ? "Improved" : "Improve"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleCancel}
                 className="text-xs h-8"
               >
@@ -403,7 +466,14 @@ export function VoiceRecorderWaveform({ onTranscriptReady, onCancel }: VoiceReco
                 type="button"
                 size="sm"
                 disabled={!editableTranscript.trim()}
-                onClick={() => onTranscriptReady(editableTranscript.trim(), speech.language)}
+                onClick={() => {
+                  const cleanedTranscript = normalizeSpeechTranscript(
+                    editableTranscript,
+                    speech.language,
+                  );
+                  setEditableTranscript(cleanedTranscript);
+                  onTranscriptReady(cleanedTranscript.trim(), speech.language);
+                }}
                 className="text-xs h-8 gap-1.5 px-4 font-medium"
               >
                 <Check className="size-3.5" /> Use this transcript →

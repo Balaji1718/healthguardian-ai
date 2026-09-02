@@ -39,7 +39,10 @@ export function SafeActivityPanel({ outcome }: SafeActivityPanelProps) {
         aria-expanded={open}
       >
         <Activity className="size-3" />
-        <span>{t("assistant.activitySteps", { count: safeMeta.toolCount }) || `Activity (${safeMeta.toolCount} steps)`}</span>
+        <span>
+          {t("assistant.activitySteps", { count: safeMeta.toolCount }) ||
+            `Activity (${safeMeta.toolCount} steps)`}
+        </span>
         <ChevronDown
           className={`size-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
@@ -49,7 +52,8 @@ export function SafeActivityPanel({ outcome }: SafeActivityPanelProps) {
         <div className="mt-2 space-y-2 rounded-xl bg-muted/40 p-3 text-xs border">
           <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground border-b pb-1.5">
             <span className="flex items-center gap-1">
-              <ShieldCheck className="size-3.5 text-primary" /> {t("assistant.verifiedSafeExecution")}
+              <ShieldCheck className="size-3.5 text-primary" />{" "}
+              {t("assistant.verifiedSafeExecution")}
             </span>
             <Badge variant="outline" className="text-[10px] px-1.5 py-0">
               {safeMeta.status}
@@ -57,7 +61,9 @@ export function SafeActivityPanel({ outcome }: SafeActivityPanelProps) {
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <p className="text-[11px] text-muted-foreground">{t("assistant.authorizedOperations")}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {t("assistant.authorizedOperations")}
+            </p>
             <ul className="space-y-1">
               {outcome.usedTools.map((t, idx) => (
                 <li

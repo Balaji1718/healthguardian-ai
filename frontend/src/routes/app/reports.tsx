@@ -127,13 +127,19 @@ export function ReportsPage() {
       await qc.invalidateQueries({ queryKey: ["reports"] });
       toast[found.length ? "success" : "warning"](
         found.length
-          ? (t("reports.valuesReadPrompt", { count: found.length }) || `${found.length} value(s) read. Please check each one before saving.`)
-          : (t("reports.textNotReadWarning") || "The text could not be read reliably. You can still keep the document and enter values manually.")
+          ? t("reports.valuesReadPrompt", { count: found.length }) ||
+              `${found.length} value(s) read. Please check each one before saving.`
+          : t("reports.textNotReadWarning") ||
+              "The text could not be read reliably. You can still keep the document and enter values manually.",
       );
     } catch (err) {
       if (uid && reportId) await updateReport(uid, reportId, { ocrStatus: "failed" });
       if (uid && localFileId) await deleteLocalDocument(uid, localFileId);
-      toast.error((err as Error).message || t("reports.readingFailed") || "Reading the document failed on this device.");
+      toast.error(
+        (err as Error).message ||
+          t("reports.readingFailed") ||
+          "Reading the document failed on this device.",
+      );
     } finally {
       setBusy(false);
       setProgress(null);

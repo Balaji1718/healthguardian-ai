@@ -277,9 +277,7 @@ export function RiskPage() {
               />
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold">
-                    {formatFactorTitle(p.factor, t)}
-                  </h3>
+                  <h3 className="font-semibold">{formatFactorTitle(p.factor, t)}</h3>
                   <Badge
                     variant="secondary"
                     className={LEVEL_STYLES[p.severity === 2 ? "high" : "moderate"]}

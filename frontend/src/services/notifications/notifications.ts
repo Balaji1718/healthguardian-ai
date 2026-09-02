@@ -33,6 +33,8 @@ export async function requestNotificationPermission(): Promise<
   }
 }
 
+const APP_NOTIFICATION_ICON = "/pwa-192.png";
+
 export async function showBrowserNotification(title: string, body: string): Promise<boolean> {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return false;
 
@@ -43,8 +45,8 @@ export async function showBrowserNotification(title: string, body: string): Prom
       if (reg && typeof reg.showNotification === "function") {
         await reg.showNotification(title, {
           body,
-          icon: "/icons/icon-192.png",
-          badge: "/icons/icon-192.png",
+          icon: APP_NOTIFICATION_ICON,
+          badge: APP_NOTIFICATION_ICON,
           tag: "healthguardian-alert",
         });
         return true;
@@ -56,7 +58,7 @@ export async function showBrowserNotification(title: string, body: string): Prom
 
   // 2. Desktop Notification API fallback
   try {
-    new Notification(title, { body, icon: "/icons/icon-192.png", tag: "healthguardian-alert" });
+    new Notification(title, { body, icon: APP_NOTIFICATION_ICON, tag: "healthguardian-alert" });
     return true;
   } catch {
     return false;

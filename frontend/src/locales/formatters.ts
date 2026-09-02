@@ -56,25 +56,36 @@ export function formatPatternDetail(
   if (!text) return "";
 
   // 1. Sleep deviation: "Recent sleep is 2.0h lower than your usual pattern of 8.0h."
-  const sleepDevMatch = text.match(/Recent sleep is ([\d.]+)h lower than your usual pattern of ([\d.]+)h\./i);
+  const sleepDevMatch = text.match(
+    /Recent sleep is ([\d.]+)h lower than your usual pattern of ([\d.]+)h\./i,
+  );
   if (sleepDevMatch) {
     return t("risk.patternDetails.sleepDev", { dev: sleepDevMatch[1], baseline: sleepDevMatch[2] });
   }
 
   // 2. Activity deviation: "Recent activity is 15 min/day below your usual pattern of 40 min."
-  const actDevMatch = text.match(/Recent activity is ([\d.]+) min\/day below your usual pattern of ([\d.]+) min\./i);
+  const actDevMatch = text.match(
+    /Recent activity is ([\d.]+) min\/day below your usual pattern of ([\d.]+) min\./i,
+  );
   if (actDevMatch) {
-    return t("risk.patternDetails.lowActivityDev", { dev: actDevMatch[1], baseline: actDevMatch[2] });
+    return t("risk.patternDetails.lowActivityDev", {
+      dev: actDevMatch[1],
+      baseline: actDevMatch[2],
+    });
   }
 
   // 3. Water deviation: "Recent water intake is 2.0 glasses below your usual pattern of 7.0 glasses."
-  const waterDevMatch = text.match(/Recent water(?: intake)? is ([\d.]+) glasses below your usual pattern of ([\d.]+) glasses\./i);
+  const waterDevMatch = text.match(
+    /Recent water(?: intake)? is ([\d.]+) glasses below your usual pattern of ([\d.]+) glasses\./i,
+  );
   if (waterDevMatch) {
     return t("risk.patternDetails.waterDev", { dev: waterDevMatch[1], baseline: waterDevMatch[2] });
   }
 
   // 4. Sleep decline: "Sleep went from 8.0h to 6.0h across your last 4 entries."
-  const sleepDeclineMatch = text.match(/Sleep went from ([\d.]+)h to ([\d.]+)h across your last (\d+) entries\./i);
+  const sleepDeclineMatch = text.match(
+    /Sleep went from ([\d.]+)h to ([\d.]+)h across your last (\d+) entries\./i,
+  );
   if (sleepDeclineMatch) {
     return t("risk.patternDetails.sleepDecline", {
       start: sleepDeclineMatch[1],
@@ -127,13 +138,19 @@ export function formatPatternDetail(
   // 12. Frequent headaches: "Headache logged 3 times in the last 14 days."
   const headacheMatch = text.match(/Headache logged (\d+) times in the last (\d+) days\./i);
   if (headacheMatch) {
-    return t("risk.patternDetails.frequentHeadaches", { count: headacheMatch[1], days: headacheMatch[2] });
+    return t("risk.patternDetails.frequentHeadaches", {
+      count: headacheMatch[1],
+      days: headacheMatch[2],
+    });
   }
 
   // 13. Repeated symptoms: "Fatigue logged 3 times recently."
   const symptomMatch = text.match(/(.+) logged (\d+) times recently\./i);
   if (symptomMatch) {
-    return t("risk.patternDetails.repeatedSymptoms", { symptom: symptomMatch[1], count: symptomMatch[2] });
+    return t("risk.patternDetails.repeatedSymptoms", {
+      symptom: symptomMatch[1],
+      count: symptomMatch[2],
+    });
   }
 
   // 14. Lab abnormalities: "2 lab test(s) outside normal reference range."
@@ -203,19 +220,25 @@ export function formatScoreContribution(
   if (!text) return "";
 
   // "Recent sleep is 2.0h lower than your usual pattern of 8.0h."
-  const sleepMatch = text.match(/Recent sleep is ([\d.]+)h lower than your usual pattern of ([\d.]+)h\./i);
+  const sleepMatch = text.match(
+    /Recent sleep is ([\d.]+)h lower than your usual pattern of ([\d.]+)h\./i,
+  );
   if (sleepMatch) {
     return t("dashboard.contributions.sleepLower", { dev: sleepMatch[1], baseline: sleepMatch[2] });
   }
 
   // "Recent activity is 15 min/day below your usual pattern of 40 min."
-  const actMatch = text.match(/Recent activity is ([\d.]+) min\/day below your usual pattern of ([\d.]+) min\./i);
+  const actMatch = text.match(
+    /Recent activity is ([\d.]+) min\/day below your usual pattern of ([\d.]+) min\./i,
+  );
   if (actMatch) {
     return t("dashboard.contributions.activityBelow", { dev: actMatch[1], baseline: actMatch[2] });
   }
 
   // "Recent water intake is 2.0 glasses below your usual pattern of 7.0 glasses."
-  const waterMatch = text.match(/Recent water(?: intake)? is ([\d.]+) glasses below your usual pattern of ([\d.]+) glasses\./i);
+  const waterMatch = text.match(
+    /Recent water(?: intake)? is ([\d.]+) glasses below your usual pattern of ([\d.]+) glasses\./i,
+  );
   if (waterMatch) {
     return t("dashboard.contributions.waterBelow", { dev: waterMatch[1], baseline: waterMatch[2] });
   }

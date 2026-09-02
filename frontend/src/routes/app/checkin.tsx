@@ -490,7 +490,8 @@ function Checkin() {
           <div className="grid gap-3 sm:grid-cols-3 pt-4 text-xs text-muted-foreground">
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Mic className="size-3.5 text-primary" /> {t("checkin.features.multilingualVoiceTitle")}
+                <Mic className="size-3.5 text-primary" />{" "}
+                {t("checkin.features.multilingualVoiceTitle")}
               </span>
               <p className="text-[11px] leading-relaxed">
                 {t("checkin.features.multilingualVoiceDesc")}
@@ -499,7 +500,8 @@ function Checkin() {
 
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-primary" /> {t("checkin.features.naturalTypingTitle")}
+                <Sparkles className="size-3.5 text-primary" />{" "}
+                {t("checkin.features.naturalTypingTitle")}
               </span>
               <p className="text-[11px] leading-relaxed">
                 {t("checkin.features.naturalTypingDesc")}
@@ -508,11 +510,10 @@ function Checkin() {
 
             <div className="p-3 rounded-xl border bg-card/40 space-y-1">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <FileText className="size-3.5 text-primary" /> {t("checkin.features.folderOcrTitle")}
+                <FileText className="size-3.5 text-primary" />{" "}
+                {t("checkin.features.folderOcrTitle")}
               </span>
-              <p className="text-[11px] leading-relaxed">
-                {t("checkin.features.folderOcrDesc")}
-              </p>
+              <p className="text-[11px] leading-relaxed">{t("checkin.features.folderOcrDesc")}</p>
             </div>
           </div>
         </div>

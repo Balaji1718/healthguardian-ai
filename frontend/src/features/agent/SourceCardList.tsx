@@ -29,7 +29,8 @@ export function SourceCardList({ sources }: SourceCardListProps) {
         >
           <Globe className="size-3.5 text-primary" />
           <span>
-            {t("assistant.webSearchUsedPill", { count: sources.length }) || `Web search used · ${sources.length} sources`}
+            {t("assistant.webSearchUsedPill", { count: sources.length }) ||
+              `Web search used · ${sources.length} sources`}
           </span>
           <ChevronDown
             className={`size-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}

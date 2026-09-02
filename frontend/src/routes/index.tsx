@@ -103,7 +103,9 @@ export function Landing() {
           </div>
           <p className="text-sm text-muted-foreground">{t("landing.privacyCard")}</p>
         </div>
-        <p className="mt-6 text-xs leading-relaxed text-muted-foreground">{t("common.medicalDisclaimer")}</p>
+        <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
+          {t("common.medicalDisclaimer")}
+        </p>
       </section>
     </div>
   );

@@ -95,11 +95,7 @@ export function ChatComposer({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={!online || busy}
-            placeholder={
-              online
-                ? t("assistant.composerPlaceholder")
-                : t("common.offlineNotice")
-            }
+            placeholder={online ? t("assistant.composerPlaceholder") : t("common.offlineNotice")}
             className="min-h-[44px] max-h-36 resize-none border-0 bg-transparent px-3 py-1.5 text-sm shadow-none focus-visible:ring-0 focus-visible:outline-none placeholder:text-muted-foreground/70"
           />
 

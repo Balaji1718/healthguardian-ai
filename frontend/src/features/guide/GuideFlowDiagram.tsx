@@ -106,9 +106,7 @@ export function ThreeLayerRiskDiagram() {
             {t("guide.diagram.risk.layer1Badge")}
           </span>
         </div>
-        <p className="text-xs font-medium text-foreground">
-          {t("guide.diagram.risk.layer1Title")}
-        </p>
+        <p className="text-xs font-medium text-foreground">{t("guide.diagram.risk.layer1Title")}</p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
           {t("guide.diagram.risk.layer1Desc")}
         </p>
@@ -121,9 +119,7 @@ export function ThreeLayerRiskDiagram() {
             {t("guide.diagram.risk.layer2Badge")}
           </span>
         </div>
-        <p className="text-xs font-medium text-foreground">
-          {t("guide.diagram.risk.layer2Title")}
-        </p>
+        <p className="text-xs font-medium text-foreground">{t("guide.diagram.risk.layer2Title")}</p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
           {t("guide.diagram.risk.layer2Desc")}
         </p>
@@ -136,9 +132,7 @@ export function ThreeLayerRiskDiagram() {
             {t("guide.diagram.risk.layer3Badge")}
           </span>
         </div>
-        <p className="text-xs font-medium text-foreground">
-          {t("guide.diagram.risk.layer3Title")}
-        </p>
+        <p className="text-xs font-medium text-foreground">{t("guide.diagram.risk.layer3Title")}</p>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
           {t("guide.diagram.risk.layer3Desc")}
         </p>
@@ -158,7 +152,9 @@ export function AgenticDecisionDiagram() {
         </p>
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2 rounded-md bg-background p-2.5 border">
-            <span className="font-semibold text-primary">{t("guide.diagram.agent.userQuestionLabel")}</span>
+            <span className="font-semibold text-primary">
+              {t("guide.diagram.agent.userQuestionLabel")}
+            </span>
             <span className="text-muted-foreground italic">
               {t("guide.diagram.agent.sampleQuestion")}
             </span>

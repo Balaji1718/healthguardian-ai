@@ -207,15 +207,13 @@ function SettingsPage() {
   const removeAccount = async () => {
     if (!password) {
       toast.error(
-        t("settings.enterPasswordToDelete") ||
-          "Enter your password to confirm account deletion.",
+        t("settings.enterPasswordToDelete") || "Enter your password to confirm account deletion.",
       );
       return;
     }
     if (
       !window.confirm(
-        t("settings.confirmDeleteAccount") ||
-          "Delete your account and every record permanently?",
+        t("settings.confirmDeleteAccount") || "Delete your account and every record permanently?",
       )
     )
       return;
@@ -234,10 +232,7 @@ function SettingsPage() {
 
   return (
     <div>
-      <PageHeader
-        title={t("settings.title")}
-        description={t("settings.subtitle")}
-      />
+      <PageHeader title={t("settings.title")} description={t("settings.subtitle")} />
 
       <section className="surface grid gap-4 p-6 sm:grid-cols-2">
         <h2 className="font-medium sm:col-span-2">{t("common.aboutYou")}</h2>
@@ -325,9 +320,7 @@ function SettingsPage() {
 
       <section className="surface mt-4 space-y-3 p-6">
         <h2 className="font-medium">{t("common.appearanceTheme")}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t("common.appearanceThemeDesc")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("common.appearanceThemeDesc")}</p>
         <div className="pt-1">
           <ThemeToggle variant="buttons" />
         </div>
@@ -399,9 +392,7 @@ function SettingsPage() {
 
       <section className="surface mt-4 space-y-3 border-destructive/40 p-6">
         <h2 className="font-medium text-destructive">{t("common.deleteYourAccount")}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t("common.deleteAccountNotice")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("common.deleteAccountNotice")}</p>
         <div className="flex flex-wrap items-end gap-2">
           <div className="space-y-1.5">
             <Label htmlFor="confirmPassword">{t("common.confirmWithPassword")}</Label>

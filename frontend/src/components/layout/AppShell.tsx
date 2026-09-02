@@ -85,8 +85,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-card/90 px-4 backdrop-blur lg:pl-[17rem]">
+    <div className="min-h-[100dvh] bg-background">
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-card/90 px-3 backdrop-blur sm:px-4 lg:pl-[17rem]">
         <Button
           variant="ghost"
           size="icon"
@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <main className="lg:pl-64">
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 pb-24">
+        <div className="mx-auto w-full max-w-5xl px-3 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4">
           {path === "/app/dashboard" && (
             <NewUserGuidePrompt onStartTour={() => setTourOpen(true)} />
           )}

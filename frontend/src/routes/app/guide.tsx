@@ -184,15 +184,11 @@ function GuidePage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-foreground">
-                {t("guide.threeLayerTitle")}
-              </p>
+              <p className="text-xs font-semibold text-foreground">{t("guide.threeLayerTitle")}</p>
               <ThreeLayerRiskDiagram />
             </div>
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-foreground">
-                {t("guide.agenticLoopTitle")}
-              </p>
+              <p className="text-xs font-semibold text-foreground">{t("guide.agenticLoopTitle")}</p>
               <AgenticDecisionDiagram />
             </div>
           </div>
@@ -223,9 +219,7 @@ function GuidePage() {
         {filteredSections.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center space-y-2">
             <p className="text-sm font-medium text-foreground">{t("guide.noMatchingTitle")}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("guide.noMatchingDesc")}
-            </p>
+            <p className="text-xs text-muted-foreground">{t("guide.noMatchingDesc")}</p>
             <Button
               variant="outline"
               size="sm"

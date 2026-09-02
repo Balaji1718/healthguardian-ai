@@ -25,7 +25,8 @@ function NotFoundComponent() {
           {t("common.pageNotFound") || "Page not found"}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("common.pageNotFoundDesc") || "The page you're looking for doesn't exist or has been moved."}
+          {t("common.pageNotFoundDesc") ||
+            "The page you're looking for doesn't exist or has been moved."}
         </p>
         <div className="mt-6">
           <Link
@@ -55,7 +56,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           {t("common.pageLoadError") || "This page didn't load"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("common.pageLoadErrorDesc") || "Something went wrong on our end. You can try refreshing or head back home."}
+          {t("common.pageLoadErrorDesc") ||
+            "Something went wrong on our end. You can try refreshing or head back home."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button

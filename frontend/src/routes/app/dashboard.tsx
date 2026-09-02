@@ -111,16 +111,16 @@ function Dashboard() {
         <div className="grid gap-4 md:grid-cols-3">
           <section className="surface p-6 md:col-span-2">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-sm font-medium text-muted-foreground">{t("dashboard.scoreTitle")}</h2>
+              <h2 className="text-sm font-medium text-muted-foreground">
+                {t("dashboard.scoreTitle")}
+              </h2>
               <Badge variant="secondary">
                 {t(`dashboard.bands.${score.band}`) || SCORE_BANDS[score.band]}
               </Badge>
             </div>
             <p className="mt-2 text-5xl font-semibold tracking-tight">{score.score}</p>
             <Progress value={score.score} className="mt-4" />
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("dashboard.scoreDisclaimer")}
-            </p>
+            <p className="mt-3 text-xs text-muted-foreground">{t("dashboard.scoreDisclaimer")}</p>
             <ul className="mt-4 space-y-1.5 text-sm">
               {score.contributions.slice(0, 5).map((c, i) => (
                 <li key={i} className="flex items-start justify-between gap-3">
@@ -134,7 +134,9 @@ function Dashboard() {
           </section>
 
           <section className="surface p-6">
-            <h2 className="text-sm font-medium text-muted-foreground">{t("dashboard.recentEntry")}</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">
+              {t("dashboard.recentEntry")}
+            </h2>
             <p className="mt-1 text-sm">{last ? toDate(last.date)?.toLocaleDateString() : "—"}</p>
             <dl className="mt-4 space-y-3 text-sm">
               <Metric
@@ -145,12 +147,20 @@ function Dashboard() {
               <Metric
                 icon={Droplets}
                 label={t("dashboard.water")}
-                value={last?.waterGlasses != null ? `${last.waterGlasses} ${t("units.glasses")}` : t("dashboard.notLogged")}
+                value={
+                  last?.waterGlasses != null
+                    ? `${last.waterGlasses} ${t("units.glasses")}`
+                    : t("dashboard.notLogged")
+                }
               />
               <Metric
                 icon={Footprints}
                 label={t("dashboard.exercise")}
-                value={last?.exerciseMinutes != null ? `${last.exerciseMinutes} ${t("units.mins")}` : t("dashboard.notLogged")}
+                value={
+                  last?.exerciseMinutes != null
+                    ? `${last.exerciseMinutes} ${t("units.mins")}`
+                    : t("dashboard.notLogged")
+                }
               />
             </dl>
           </section>
@@ -177,9 +187,7 @@ function Dashboard() {
               </div>
             )}
             {patterns.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                {t("dashboard.noPatterns")}
-              </p>
+              <p className="mt-3 text-sm text-muted-foreground">{t("dashboard.noPatterns")}</p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {patterns.slice(0, 4).map((p) => (

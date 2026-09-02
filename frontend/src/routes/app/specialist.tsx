@@ -48,9 +48,7 @@ export function SpecialistPage() {
       <PageHeader
         title={t("specialist.title")}
         description={t("specialist.subtitle")}
-        action={
-          <ContextualHelp content={t("specialist.contextHelp")} />
-        }
+        action={<ContextualHelp content={t("specialist.contextHelp")} />}
       />
 
       {/* Purpose Definition Card */}

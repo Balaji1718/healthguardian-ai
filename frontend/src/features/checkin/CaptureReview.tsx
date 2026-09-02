@@ -95,7 +95,7 @@ export function CaptureReview({
         value: wellbeingObj
           ? `${wellbeingObj.icon} ${t(`wellbeing.${data.wellbeing}`) || wellbeingObj.label}`
           : data.wellbeing
-            ? (t(`wellbeing.${data.wellbeing}`) || data.wellbeing)
+            ? t(`wellbeing.${data.wellbeing}`) || data.wellbeing
             : t("dashboard.notLogged"),
         hasValue: Boolean(data.wellbeing),
         canExclude: true,
@@ -104,7 +104,10 @@ export function CaptureReview({
       {
         id: "sleepHours",
         label: t("dashboard.sleep"),
-        value: data.sleepHours != null ? `${data.sleepHours} ${t("units.hours")}` : t("dashboard.notLogged"),
+        value:
+          data.sleepHours != null
+            ? `${data.sleepHours} ${t("units.hours")}`
+            : t("dashboard.notLogged"),
         hasValue: data.sleepHours != null,
         canExclude: true,
         confidence: fieldConfidence.sleepHours || "high",
@@ -112,7 +115,10 @@ export function CaptureReview({
       {
         id: "waterGlasses",
         label: t("dashboard.water"),
-        value: data.waterGlasses != null ? `${data.waterGlasses} ${t("units.glasses")}` : t("dashboard.notLogged"),
+        value:
+          data.waterGlasses != null
+            ? `${data.waterGlasses} ${t("units.glasses")}`
+            : t("dashboard.notLogged"),
         hasValue: data.waterGlasses != null,
         canExclude: true,
         confidence: fieldConfidence.waterGlasses || "high",
@@ -131,7 +137,8 @@ export function CaptureReview({
       {
         id: "weightKg",
         label: t("dashboard.weight"),
-        value: data.weightKg != null ? `${data.weightKg} ${t("units.kg")}` : t("dashboard.notLogged"),
+        value:
+          data.weightKg != null ? `${data.weightKg} ${t("units.kg")}` : t("dashboard.notLogged"),
         hasValue: data.weightKg != null,
         canExclude: true,
         confidence: fieldConfidence.weightKg || "high",
@@ -242,9 +249,7 @@ export function CaptureReview({
             <Sparkles className="size-3.5" />
             <span>{t("review.spokenInputLabel") || "What you spoke / typed:"}</span>
           </div>
-          <p className="text-foreground text-xs leading-relaxed italic pl-5">
-            "{inputUtterance}"
-          </p>
+          <p className="text-foreground text-xs leading-relaxed italic pl-5">"{inputUtterance}"</p>
         </div>
       )}
 
@@ -352,8 +357,8 @@ export function CaptureReview({
               className="text-[11px] text-primary hover:underline"
             >
               {includedFields.symptoms
-                ? (t("review.exclude") || "Exclude")
-                : (t("review.include") || "Include")}
+                ? t("review.exclude") || "Exclude"
+                : t("review.include") || "Include"}
             </button>
           </div>
           {includedFields.symptoms && (
@@ -376,17 +381,15 @@ export function CaptureReview({
       {data.notes && (
         <div className="space-y-1 rounded-xl bg-muted/40 p-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground block">
-              {t("checkin.notes")}:
-            </span>
+            <span className="font-semibold text-foreground block">{t("checkin.notes")}:</span>
             <button
               type="button"
               onClick={() => toggleField("notes")}
               className="text-[11px] text-primary hover:underline"
             >
               {includedFields.notes
-                ? (t("review.excludeField") || "Exclude")
-                : (t("review.includeField") || "Include")}
+                ? t("review.excludeField") || "Exclude"
+                : t("review.includeField") || "Include"}
             </button>
           </div>
           {includedFields.notes && (

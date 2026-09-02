@@ -128,8 +128,8 @@ function Assistant() {
     // Dynamic loading phase indicator
     setLoadingPhase(
       isSearchActive
-        ? (t("assistant.searchingWeb") || "Searching verified medical guidelines…")
-        : (t("assistant.analyzingRecords") || "Analyzing your health records…"),
+        ? t("assistant.searchingWeb") || "Searching verified medical guidelines…"
+        : t("assistant.analyzingRecords") || "Analyzing your health records…",
     );
 
     try {
