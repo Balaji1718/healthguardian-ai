@@ -1,10 +1,12 @@
 import {
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
   reauthenticateWithCredential,
   EmailAuthProvider,
   sendPasswordResetEmail,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -17,6 +19,11 @@ export { getFirebaseAuth };
 
 export async function register(email: string, password: string, displayName: string) {
   const auth = getFirebaseAuth();
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+  } catch (err) {
+    console.warn("Could not set browserLocalPersistence:", err);
+  }
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   if (displayName) await updateProfile(cred.user, { displayName });
   await ensureUserRoot(cred.user.uid, email, displayName || email.split("@")[0]!);
@@ -24,7 +31,13 @@ export async function register(email: string, password: string, displayName: str
 }
 
 export async function login(email: string, password: string) {
-  const cred = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+  const auth = getFirebaseAuth();
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+  } catch (err) {
+    console.warn("Could not set browserLocalPersistence:", err);
+  }
+  const cred = await signInWithEmailAndPassword(auth, email, password);
   await ensureUserRoot(cred.user.uid, cred.user.email ?? email, cred.user.displayName ?? "");
   return cred.user;
 }

@@ -42,6 +42,7 @@
     "exportEverything": "Export everything (JSON)",
     "deleteAllHealthData": "Delete all health data",
     "signOut": "Sign out",
+    "signOutSuccess": "Signed out successfully.",
     "deleteAccount": "Delete account",
     "deleteYourAccount": "Delete your account",
     "confirmWithPassword": "Confirm with your password",
@@ -119,7 +120,9 @@
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 6 characters.",
     "signInSuccess": "Welcome back!",
-    "signUpSuccess": "Account created successfully!"
+    "signUpSuccess": "Account created successfully!",
+    "checkingSession": "Checking your session…",
+    "redirectingToDashboard": "Redirecting to your dashboard…"
   },
   "dashboard": {
     "greeting": "Welcome back",

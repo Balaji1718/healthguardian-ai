@@ -7,9 +7,7 @@ import {
   EyeOff,
   Heart,
   Loader2,
-  LogOut,
   Mail,
-  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authSchema, registerSchema } from "@/core/validation/schemas";
-import { login, logout, register, resetPassword } from "@/services/firebase/auth";
+import { login, register, resetPassword } from "@/services/firebase/auth";
 import { isFirebaseConfigured } from "@/services/firebase/config";
 import { FirebaseSetupNotice } from "@/components/common/FirebaseSetupNotice";
 import { useAuthListener } from "@/features/auth/useAuth";
@@ -73,7 +71,36 @@ function AuthPage() {
     if (mode) setAuthMode(mode);
   }, [mode]);
 
+  useEffect(() => {
+    if (!loading && user) {
+      void navigate({ to: "/app/dashboard", replace: true });
+    }
+  }, [loading, user, navigate]);
+
   if (!isFirebaseConfigured) return <FirebaseSetupNotice />;
+
+  if (loading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md space-y-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
+              <Heart className="size-5 text-primary" /> {t("common.appName")}
+            </Link>
+            <LanguageSelector variant="auth" />
+          </div>
+          <div className="surface p-8 text-center space-y-3">
+            <Loader2 className="size-6 animate-spin text-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              {user
+                ? (t("auth.redirectingToDashboard") || "Redirecting to your dashboard…")
+                : (t("auth.checkingSession") || "Checking session…")}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const changeMode = (next: "login" | "register" | "forgot") => {
     setAuthMode(next);
@@ -146,53 +173,8 @@ function AuthPage() {
           <LanguageSelector variant="auth" />
         </div>
 
-        {!loading && user ? (
-          <div className="surface p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <UserCheck className="size-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Already signed in</h1>
-                <p className="text-xs text-muted-foreground truncate max-w-[260px]">
-                  {user.email || user.displayName || "Authenticated account"}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              You are currently authenticated on this device. You can continue to your private
-              dashboard or sign out to use another account.
-            </p>
-
-            <div className="space-y-2 pt-2">
-              <Button
-                className="w-full"
-                onClick={() => void navigate({ to: "/app/dashboard", replace: true })}
-              >
-                Continue to Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full text-muted-foreground hover:text-foreground gap-2"
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    await logout();
-                    toast.success("Signed out successfully.");
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-                disabled={busy}
-              >
-                <LogOut className="size-4" /> Sign out & use another account
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="surface p-6">
-            {authMode === "forgot" ? (
+        <div className="surface p-6">
+          {authMode === "forgot" ? (
               <div className="space-y-4">
                 <button
                   type="button"
@@ -351,7 +333,6 @@ function AuthPage() {
               </>
             )}
           </div>
-        )}
 
         <p className="mt-6 text-xs leading-relaxed text-muted-foreground text-center">
           {t("common.medicalDisclaimer")}

@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Activity, Bot, FileText, Heart, Lock, ShieldCheck, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MEDICAL_DISCLAIMER } from "@/core/constants/health";
 import { LanguageSelector } from "@/features/i18n/LanguageSelector";
 import { useTranslation } from "@/locales/i18n";
+import { useAuthListener } from "@/features/auth/useAuth";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -29,6 +31,14 @@ export const Route = createFileRoute("/")({
 
 export function Landing() {
   const { t } = useTranslation();
+  const { user, loading } = useAuthListener();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      void navigate({ to: "/app/dashboard", replace: true });
+    }
+  }, [loading, user, navigate]);
 
   const features = [
     {
@@ -62,7 +72,11 @@ export function Landing() {
         <div className="flex items-center gap-3">
           <LanguageSelector variant="header" />
           <Button asChild variant="secondary" size="sm">
-            <Link to="/auth">{t("landing.signIn")}</Link>
+            {user ? (
+              <Link to="/app/dashboard">{t("nav.dashboard") || "Dashboard"}</Link>
+            ) : (
+              <Link to="/auth">{t("landing.signIn")}</Link>
+            )}
           </Button>
         </div>
       </header>
@@ -74,14 +88,24 @@ export function Landing() {
         </h1>
         <p className="mt-5 max-w-xl text-base opacity-95">{t("landing.heroDescription")}</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild size="lg" variant="secondary">
-            <Link to="/auth" search={{ mode: "register" }}>
-              {t("landing.createAccount")}
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link to="/auth">{t("landing.alreadyHaveAccount")}</Link>
-          </Button>
+          {user ? (
+            <Button asChild size="lg" variant="secondary">
+              <Link to="/app/dashboard">
+                {t("nav.dashboard") || "Go to Dashboard"}
+              </Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild size="lg" variant="secondary">
+                <Link to="/auth" search={{ mode: "register" }}>
+                  {t("landing.createAccount")}
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/auth">{t("landing.alreadyHaveAccount")}</Link>
+              </Button>
+            </>
+          )}
         </div>
       </section>
 

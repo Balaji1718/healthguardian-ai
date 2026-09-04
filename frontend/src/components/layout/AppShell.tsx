@@ -1,4 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   Bell,
@@ -10,6 +11,7 @@ import {
   Heart,
   LifeBuoy,
   LineChart,
+  LogOut,
   Menu,
   Settings,
   Stethoscope,
@@ -18,9 +20,11 @@ import {
   X,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/services/firebase/auth";
 import { GuidedTourModal } from "@/features/guide/GuidedTourModal";
 import { NewUserGuidePrompt } from "@/features/guide/NewUserGuidePrompt";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -55,9 +59,28 @@ export const NAV_ITEMS = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const user = useAppStore((s) => s.user);
   const online = useAppStore((s) => s.online);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const { t } = useTranslation();
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await qc.cancelQueries();
+      qc.clear();
+      await logout();
+      toast.success(t("common.signOutSuccess") || "Signed out successfully.");
+      await navigate({ to: "/auth", replace: true });
+    } catch {
+      toast.error("Failed to sign out. Please try again.");
+    } finally {
+      setSigningOut(false);
+    }
+  };
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
@@ -122,15 +145,38 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 border-r bg-sidebar transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 border-r bg-sidebar transition-transform lg:translate-x-0 flex flex-col justify-between",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-14 items-center gap-2 border-b px-4">
+        <div className="flex h-14 items-center gap-2 border-b px-4 shrink-0">
           <Heart className="size-5 text-primary" />
           <span className="font-semibold tracking-tight">HealthGuardian AI</span>
         </div>
-        <div className="h-[calc(100vh-3.5rem)] overflow-y-auto">{nav}</div>
+        <div className="flex-1 overflow-y-auto">{nav}</div>
+        {user && (
+          <div className="border-t p-3 shrink-0 flex items-center justify-between gap-2 bg-sidebar-accent/15">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-foreground truncate">
+                {user.displayName || user.email?.split("@")[0] || "User"}
+              </p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {user.email || ""}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
+              title={t("common.signOut") || "Sign out"}
+              aria-label={t("common.signOut") || "Sign out"}
+              onClick={handleSignOut}
+              disabled={signingOut}
+            >
+              <LogOut className="size-4" />
+            </Button>
+          </div>
+        )}
       </aside>
       {open && (
         <div

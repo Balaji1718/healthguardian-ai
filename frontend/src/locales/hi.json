@@ -42,6 +42,7 @@
     "exportEverything": "सभी डेटा निर्यात करें (JSON)",
     "deleteAllHealthData": "सभी स्वास्थ्य डेटा हटाएं",
     "signOut": "साइन आउट",
+    "signOutSuccess": "सफलतापूर्वक साइन आउट हो गया।",
     "deleteAccount": "खाता हटाएं",
     "deleteYourAccount": "अपना खाता हटाएं",
     "confirmWithPassword": "पुष्टि के लिए अपना पासवर्ड दर्ज करें",
@@ -119,7 +120,9 @@
     "invalidEmail": "कृपया एक मान्य ईमेल पता दर्ज करें।",
     "passwordTooShort": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।",
     "signInSuccess": "वापसी पर स्वागत है!",
-    "signUpSuccess": "खाता सफलतापूर्वक बनाया गया!"
+    "signUpSuccess": "खाता सफलतापूर्वक बनाया गया!",
+    "checkingSession": "आपका सत्र जाँचा जा रहा है…",
+    "redirectingToDashboard": "आपके डैशबोर्ड पर ले जाया जा रहा है…"
   },
   "dashboard": {
     "greeting": "वापसी पर स्वागत है",
